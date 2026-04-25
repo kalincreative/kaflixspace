@@ -16,12 +16,12 @@ export default function Footer() {
           </div>
 
           <div>
-            <h4 className="font-semibold text-neutral-900 mb-4">Spaces</h4>
+            <h4 className="font-semibold text-neutral-900 mb-4">Explore</h4>
             <ul className="flex flex-col gap-2 text-sm text-neutral-500">
-              <li><Link to="/booking" className="hover:text-[#FF1493]">Grand Seminar Hall</Link></li>
-              <li><Link to="/booking" className="hover:text-[#FF1493]">Executive Boardroom</Link></li>
-              <li><Link to="/booking" className="hover:text-[#FF1493]">Creative Workshop</Link></li>
-              <li><Link to="/booking" className="hover:text-[#FF1493]">Focus Pod</Link></li>
+              <li><Link to="/booking" className="hover:text-[#FF1493]">All Spaces</Link></li>
+              <li><Link to="/" className="hover:text-[#FF1493]">Image Gallery</Link></li>
+              <li><Link to="/" className="hover:text-[#FF1493]">News & Insights</Link></li>
+              <li><Link to="/" className="hover:text-[#FF1493]">FAQ & Help</Link></li>
             </ul>
           </div>
 
