@@ -8,6 +8,9 @@ import Login from './pages/Login'
 import Navbar from './components/Navbar'
 import VenueDetails from './pages/VenueDetails'
 import Checkout from './pages/Checkout'
+import Gallery from './pages/Gallery'
+import News from './pages/News'
+import Contact from './pages/Contact'
 import { ReservationProvider } from './context/ReservationContext'
 import ReservationDrawer from './components/ReservationDrawer'
 
@@ -46,9 +49,9 @@ export default function App() {
             <Route path="/spaces/:id" element={<VenueDetails />} />
             <Route path="/spaces" element={<SpacesPage />} />
             <Route path="/checkout" element={<Checkout />} />
-            <Route path="/gallery" element={<Home />} />
-            <Route path="/news" element={<Home />} />
-            <Route path="/contact" element={<Home />} />
+            <Route path="/gallery" element={<Gallery />} />
+            <Route path="/news" element={<News />} />
+            <Route path="/contact" element={<Contact />} />
             <Route path="/booking/:roomId" element={<Booking />} />
             <Route path="/booking" element={<Booking />} />
             <Route path="/admin" element={user?.isAdmin ? <Admin /> : <Navigate to="/login" />} />

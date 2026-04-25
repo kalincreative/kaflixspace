@@ -47,7 +47,7 @@ export default function Navbar() {
 
       {mobileMenuOpen && (
         <div className="md:hidden px-4 py-4 space-y-4">
-          <Link to="/" className="block py-2">Spaces</Link>
+          <Link to="/spaces" className="block py-2">Spaces</Link>
           <Link to="/gallery" className="block py-2">Gallery</Link>
           <Link to="/news" className="block py-2">News</Link>
           <Link to="/contact" className="block py-2">Contact</Link>
