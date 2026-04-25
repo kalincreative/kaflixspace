@@ -22,7 +22,7 @@ export default function WhyChooseSection() {
   return (
     <section className="py-24 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           <div>
             <p className="text-sm font-semibold tracking-widest text-[#FF1493] uppercase mb-3">
               THE KAFLIX ADVANTAGE
@@ -47,11 +47,11 @@ export default function WhyChooseSection() {
             </div>
           </div>
 
-          <div className="flex items-center justify-center">
+          <div className="flex items-center">
             <img
               src="/advantage.png"
               alt="Corporate meeting room"
-              className="w-full max-h-[300px] object-cover rounded-3xl shadow-2xl"
+              className="w-full aspect-[4/3] object-cover rounded-3xl shadow-2xl max-h-[550px]"
             />
           </div>
         </div>
