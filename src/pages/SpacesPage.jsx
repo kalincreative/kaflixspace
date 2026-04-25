@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Search, Users, MapPin, ArrowRight } from 'lucide-react'
+import { Search, Users, MapPin, ArrowRight, ChevronDown } from 'lucide-react'
 
 const spaces = [
   { id: 1, name: 'Grand Seminar Hall', capacity: 120, price: 'RM150', image: '/Spaces/Grand Seminar Hall.png' },
@@ -58,15 +58,18 @@ export default function SpacesPage() {
               className="w-full pl-12 pr-4 py-3 rounded-full border border-neutral-200 focus:outline-none focus:ring-2 focus:ring-[#FF1493]/50"
             />
           </div>
-          <select
-            value={capacityFilter}
-            onChange={(e) => setCapacityFilter(e.target.value)}
-            className="px-6 py-3 rounded-full border border-neutral-200 focus:outline-none focus:ring-2 focus:ring-[#FF1493]/50"
-          >
-            {capacityFilters.map(filter => (
-              <option key={filter.value} value={filter.value}>{filter.label}</option>
-            ))}
-          </select>
+          <div className="relative">
+            <select
+              value={capacityFilter}
+              onChange={(e) => setCapacityFilter(e.target.value)}
+              className="w-full md:w-auto px-6 py-3 rounded-full border border-neutral-200 focus:outline-none focus:ring-2 focus:ring-[#FF1493]/50 appearance-none pr-10"
+            >
+              {capacityFilters.map(filter => (
+                <option key={filter.value} value={filter.value}>{filter.label}</option>
+              ))}
+            </select>
+            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400 pointer-events-none" />
+          </div>
         </div>
       </section>
 
