@@ -9,7 +9,7 @@ const featuredSpaces = [
     capacity: '120 Seats',
     location: 'Main Building, Floor 1',
     price: '$120',
-    image: '/logo/1.png'
+    image: '/spaces/Grand Seminar Hall.png'
   },
   {
     id: 2,
@@ -17,7 +17,7 @@ const featuredSpaces = [
     capacity: '20 Seats',
     location: 'Tower A, Floor 10',
     price: '$80',
-    image: '/logo/2.png'
+    image: '/spaces/Executive Boardroom.png'
   },
   {
     id: 3,
@@ -25,7 +25,7 @@ const featuredSpaces = [
     capacity: '30 Seats',
     location: 'Innovation Hub, Floor 3',
     price: '$60',
-    image: '/logo/3.png'
+    image: '/spaces/Creative Workshop.png'
   },
   {
     id: 4,
@@ -33,7 +33,7 @@ const featuredSpaces = [
     capacity: '6 Seats',
     location: 'Main Building, Floor 2',
     price: '$35',
-    image: '/logo/4.png'
+    image: '/spaces/Focus Pod.png'
   }
 ]
 
