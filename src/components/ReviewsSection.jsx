@@ -7,35 +7,35 @@ const reviews = [
     id: 1,
     name: 'Sarah Ahmad',
     title: 'CEO, TechVenture Malaysia',
-    image: '/review1.jpg',
+    image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=500&fit=crop',
     quote: 'KaFlix Space transformed our annual tech summit into an unforgettable experience. The facilities and service were impeccable.'
   },
   {
     id: 2,
     name: 'Michael Chen',
     title: 'Director, Apex Consulting',
-    image: '/review2.jpg',
+    image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=500&fit=crop',
     quote: 'Professional, clean, and inspiring. The best venue we have worked with for our corporate training programs.'
   },
   {
     id: 3,
     name: 'Dr. Amanda Lee',
     title: 'Founder, MedInnovate Asia',
-    image: '/review3.jpg',
+    image: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400&h=500&fit=crop',
     quote: 'Our medical conference was a huge success thanks to the exceptional facilities and support at KaFlix Space.'
   },
   {
     id: 4,
     name: 'James Wong',
     title: 'VP Operations, FinanceHub',
-    image: '/review4.jpg',
+    image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=500&fit=crop',
     quote: 'The attention to detail and premium amenities make KaFlix Space our go-to choice for important client meetings.'
   },
   {
     id: 5,
     name: 'Lisa Tan',
     title: 'Managing Director, CreativeHub',
-    image: '/review5.jpg',
+    image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=500&fit=crop',
     quote: 'An inspiring environment that truly fosters creativity and collaboration. Our team productivity has never been higher.'
   }
 ]
@@ -57,6 +57,7 @@ export default function ReviewsSection() {
     <section className="py-20 bg-[#F5F5F5]">
       <div className="max-w-7xl mx-auto px-4">
         <div className="text-center mb-12">
+          <p className="text-sm font-medium text-neutral-400 tracking-[0.3em] uppercase mb-2">Testimonials</p>
           <h2 className="text-4xl font-bold text-[#101010] mb-4">
             What Our Corporate Clients Say
           </h2>
@@ -66,14 +67,8 @@ export default function ReviewsSection() {
         </div>
 
         <div className="flex flex-col lg:flex-row gap-8 lg:gap-12 items-stretch">
-          <motion.div 
-            className="lg:w-[40%]"
-            initial={{ opacity: 0, x: -20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5 }}
-            viewport={{ once: true }}
-          >
-            <div className="relative h-[400px] lg:h-full">
+          <div className="lg:w-[40%]">
+            <div className="relative h-[400px] lg:h-[500px]">
               <AnimatePresence mode="wait">
                 <motion.img
                   key={activeReview.id}
@@ -87,9 +82,9 @@ export default function ReviewsSection() {
                 />
               </AnimatePresence>
             </div>
-          </motion.div>
+          </div>
 
-          <div className="lg:w-[60%] flex flex-col justify-between gap-6">
+          <div className="lg:w-[60%] flex flex-col gap-6">
             <div className="flex gap-3 justify-start">
               {reviews.map((review, idx) => (
                 <button
@@ -110,44 +105,41 @@ export default function ReviewsSection() {
               ))}
             </div>
 
-            <div className="flex-1 flex items-center">
+            <div className="flex-1 flex items-start">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={activeReview.id}
-                  className="relative"
+                  className="w-full"
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ duration: 0.3 }}
                 >
-                  <Quote className="w-12 h-12 text-[#FF1493]/20 mb-4" />
-                  <p className="text-2xl lg:text-3xl font-light text-[#101010] leading-relaxed">
+                  <Quote className="w-10 h-10 text-[#FF1493]/30 mb-4" />
+                  <p className="text-xl lg:text-2xl font-light text-[#101010] leading-relaxed">
                     "{activeReview.quote}"
                   </p>
+                  <div className="mt-6">
+                    <h4 className="text-xl font-bold text-[#101010]">{activeReview.name}</h4>
+                    <p className="text-[#FF1493] font-medium">{activeReview.title}</p>
+                  </div>
                 </motion.div>
               </AnimatePresence>
             </div>
 
-            <div className="flex items-center justify-between">
-              <div>
-                <h4 className="text-xl font-bold text-[#101010]">{activeReview.name}</h4>
-                <p className="text-[#101010]/60">{activeReview.title}</p>
-              </div>
-
-              <div className="flex gap-2">
-                <button
-                  onClick={goToPrev}
-                  className="w-12 h-12 rounded-full bg-[#FF1493] text-white flex items-center justify-center hover:bg-[#FF1493]/90 transition-colors"
-                >
-                  <ChevronLeft className="w-6 h-6" />
-                </button>
-                <button
-                  onClick={goToNext}
-                  className="w-12 h-12 rounded-full bg-[#FF1493] text-white flex items-center justify-center hover:bg-[#FF1493]/90 transition-colors"
-                >
-                  <ChevronRight className="w-6 h-6" />
-                </button>
-              </div>
+            <div className="flex gap-2">
+              <button
+                onClick={goToPrev}
+                className="w-12 h-12 rounded-full bg-[#FF1493] text-white flex items-center justify-center hover:bg-[#FF1493]/90 transition-colors"
+              >
+                <ChevronLeft className="w-6 h-6" />
+              </button>
+              <button
+                onClick={goToNext}
+                className="w-12 h-12 rounded-full bg-[#FF1493] text-white flex items-center justify-center hover:bg-[#FF1493]/90 transition-colors"
+              >
+                <ChevronRight className="w-6 h-6" />
+              </button>
             </div>
           </div>
         </div>

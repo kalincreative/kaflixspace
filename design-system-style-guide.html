@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Design System Style Guide</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background-color: #E8E8E8;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+    }
+
+    .style-guide {
+      width: 100%;
+      max-width: 640px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .card {
+      background: #FFFFFF;
+      border-radius: 16px;
+      padding: 28px;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+    }
+
+    .card-title {
+      font-size: 14px;
+      font-weight: 500;
+      color: #101010;
+      margin-bottom: 24px;
+      letter-spacing: 0.02em;
+    }
+
+    /* Color Swatches */
+    .swatches-row {
+      display: flex;
+      gap: 20px;
+    }
+
+    .swatch-item {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .swatch {
+      width: 120px;
+      height: 80px;
+      border-radius: 10px;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+    }
+
+    .swatch-label {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .swatch-label-name {
+      font-size: 13px;
+      font-weight: 500;
+      color: #101010;
+    }
+
+    .swatch-label-hex {
+      font-size: 11px;
+      font-weight: 400;
+      color: #888888;
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    /* Font Card */
+    .font-card-content {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+    }
+
+    /* Left Column - Schematic */
+    .details-column {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .baseline-diagram {
+      position: relative;
+      height: 80px;
+      border-bottom: 1px solid #E0E0E0;
+      display: flex;
+      align-items: flex-end;
+      padding-bottom: 2px;
+    }
+
+    .baseline-label {
+      position: absolute;
+      bottom: -20px;
+      left: 0;
+      font-size: 10px;
+      font-weight: 500;
+      color: #888888;
+    }
+
+    .cap-height-label {
+      position: absolute;
+      top: -4px;
+      left: 0;
+      font-size: 10px;
+      font-weight: 500;
+      color: #888888;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .cap-height-line {
+      position: absolute;
+      top: 12px;
+      left: 28px;
+      width: 1px;
+      height: 52px;
+      background: #CCCCCC;
+    }
+
+    .baseline-line {
+      position: absolute;
+      bottom: 2px;
+      left: 28px;
+      width: 1px;
+      height: 64px;
+      background: #CCCCCC;
+    }
+
+    .dm-sans-text {
+      font-size: 48px;
+      font-weight: 700;
+      color: #101010;
+      line-height: 1;
+      position: relative;
+      left: 28px;
+    }
+
+    .style-list {
+      display: flex;
+      gap: 16px;
+      font-size: 13px;
+      font-weight: 500;
+      color: #101010;
+    }
+
+    .style-list span {
+      opacity: 0.6;
+    }
+
+    /* Right Column - Character Map */
+    .character-map {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #101010;
+      letter-spacing: 0.05em;
+    }
+
+    .char-line {
+      display: flex;
+      gap: 4px;
+    }
+
+    .char-line.number-line {
+      margin-top: 4px;
+      opacity: 0.7;
+    }
+  </style>
+</head>
+<body>
+  <div class="style-guide">
+    <!-- Top Card: Color Style -->
+    <div class="card">
+      <div class="card-title">COLOR STYLE (DM Sans font, Medium style)</div>
+      <div class="swatches-row">
+        <div class="swatch-item">
+          <div class="swatch" style="background-color: #FF1493;"></div>
+          <div class="swatch-label">
+            <span class="swatch-label-name">HOT PINK</span>
+            <span class="swatch-label-hex">HEX #FF1493</span>
+          </div>
+        </div>
+        <div class="swatch-item">
+          <div class="swatch" style="background-color: #101010;"></div>
+          <div class="swatch-label">
+            <span class="swatch-label-name">BLACK</span>
+            <span class="swatch-label-hex">HEX #101010</span>
+          </div>
+        </div>
+        <div class="swatch-item">
+          <div class="swatch" style="background-color: #F5F5F5;"></div>
+          <div class="swatch-label">
+            <span class="swatch-label-name">LIGHT GRAY</span>
+            <span class="swatch-label-hex">HEX #F5F5F5</span>
+          </div>
+        </div>
+        <div class="swatch-item">
+          <div class="swatch" style="background-color: #FFFFFF;"></div>
+          <div class="swatch-label">
+            <span class="swatch-label-name">WHITE</span>
+            <span class="swatch-label-hex">HEX #FFFFFF</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Card: Font Family -->
+    <div class="card">
+      <div class="card-title">FONT FAMILY (DM Sans font, Medium style)</div>
+      <div class="font-card-content">
+        <!-- Left Details Column -->
+        <div class="details-column">
+          <div class="baseline-diagram">
+            <span class="cap-height-label">Cap Height 64px</span>
+            <span class="baseline-label">Baseline 0</span>
+            <div class="cap-height-line"></div>
+            <div class="baseline-line"></div>
+            <span class="dm-sans-text">Aa</span>
+          </div>
+          <div class="style-list">
+            <span>Regular</span> / <span>Medium</span> / <span>Bold</span>
+          </div>
+        </div>
+
+        <!-- Right Character Map -->
+        <div class="character-map">
+          <div class="char-line">Aa Bb Cc Dd Ee Ff Gg Hh Jj Kk Ll</div>
+          <div class="char-line">Mm Nn Oo Pp Qq Rr Ss Tt Uu Vv</div>
+          <div class="char-line">Ww Xx Yy Zz ., ( ) ! ?</div>
+          <div class="char-line number-line">1 2 3 4 5 6 7 8 9</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
