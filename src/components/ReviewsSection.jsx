@@ -7,35 +7,35 @@ const reviews = [
     id: 1,
     name: 'Sarah Ahmad',
     title: 'CEO, TechVenture Malaysia',
-    image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=500&fit=crop',
+    image: '/review1.jpg',
     quote: 'KaFlix Space transformed our annual tech summit into an unforgettable experience. The facilities and service were impeccable.'
   },
   {
     id: 2,
     name: 'Michael Chen',
     title: 'Director, Apex Consulting',
-    image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=500&fit=crop',
+    image: '/review2.jpg',
     quote: 'Professional, clean, and inspiring. The best venue we have worked with for our corporate training programs.'
   },
   {
     id: 3,
     name: 'Dr. Amanda Lee',
     title: 'Founder, MedInnovate Asia',
-    image: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400&h=500&fit=crop',
+    image: '/review3.jpg',
     quote: 'Our medical conference was a huge success thanks to the exceptional facilities and support at KaFlix Space.'
   },
   {
     id: 4,
     name: 'James Wong',
     title: 'VP Operations, FinanceHub',
-    image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=500&fit=crop',
+    image: '/review4.jpg',
     quote: 'The attention to detail and premium amenities make KaFlix Space our go-to choice for important client meetings.'
   },
   {
     id: 5,
     name: 'Lisa Tan',
     title: 'Managing Director, CreativeHub',
-    image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=500&fit=crop',
+    image: '/review5.jpg',
     quote: 'An inspiring environment that truly fosters creativity and collaboration. Our team productivity has never been higher.'
   }
 ]
