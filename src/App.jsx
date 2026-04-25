@@ -39,8 +39,8 @@ export default function App() {
         <Navbar />
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/spaces" element={<SpacesPage />} />
           <Route path="/spaces/:id" element={<VenueDetails />} />
+          <Route path="/spaces" element={<SpacesPage />} />
           <Route path="/gallery" element={<Home />} />
           <Route path="/news" element={<Home />} />
           <Route path="/contact" element={<Home />} />

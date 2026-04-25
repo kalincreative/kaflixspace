@@ -111,7 +111,7 @@ export default function VenueDetails() {
 
             <div>
               <h2 className="text-2xl font-bold mt-12 mb-6">Optional Add-ons</h2>
-              {add-ons.map(addon => (
+              {addOns.map(addon => (
                 <div 
                   key={addon.id}
                   onClick={() => toggleAddon(addon.id)}
