@@ -32,22 +32,26 @@ const addOns = [
 export default function VenueDetails() {
   const { id } = useParams()
   const space = spaces.find(s => s.id === Number(id))
-  const [selectedAddons, setSelectedAddons] = useState([])
+  const [addonQuantities, setAddonQuantities] = useState({})
 
   const basePrice = space ? parseInt(space.price.replace('RM', '')) : 0
-  const addonsTotal = selectedAddons.reduce((sum, addonId) => {
-    const addon = addOns.find(a => a.id === addonId)
-    return sum + (addon ? addon.price : 0)
+  const addonsTotal = Object.entries(addonQuantities).reduce((sum, [addonId, qty]) => {
+    const addon = addOns.find(a => a.id === Number(addonId))
+    return sum + (addon ? addon.price * qty : 0)
   }, 0)
   const totalPrice = basePrice + addonsTotal
-  const reservationCount = 0
+  const reservationCount = Object.values(addonQuantities).reduce((a, b) => a + b, 0)
 
-  const toggleAddon = (addonId) => {
-    setSelectedAddons(prev => 
-      prev.includes(addonId) 
-        ? prev.filter(id => id !== addonId)
-        : [...prev, addonId]
-    )
+  const updateQuantity = (addonId, change) => {
+    setAddonQuantities(prev => {
+      const current = prev[addonId] || 0
+      const next = Math.max(0, current + change)
+      if (next === 0) {
+        const { [addonId]: _, ...rest } = prev
+        return rest
+      }
+      return { ...prev, [addonId]: next }
+    })
   }
 
   if (!space) {
@@ -111,34 +115,43 @@ export default function VenueDetails() {
 
             <div>
               <h2 className="text-2xl font-bold mt-12 mb-6">Optional Add-ons</h2>
-              {addOns.map(addon => (
-                <div 
-                  key={addon.id}
-                  onClick={() => toggleAddon(addon.id)}
-                  className={`border rounded-xl p-4 flex justify-between items-center mb-3 cursor-pointer transition-colors ${
-                    selectedAddons.includes(addon.id) 
-                      ? 'border-pink-500 bg-pink-50' 
-                      : 'border-neutral-200 hover:border-pink-500'
-                  }`}
-                >
-                  <div>
-                    <h3 className="font-semibold text-neutral-900">{addon.name}</h3>
-                    <p className="text-neutral-500 text-sm">{addon.description}</p>
-                    <p className="text-pink-600 font-medium mt-1">+RM {addon.price} {addon.unit}</p>
+              {addOns.map(addon => {
+                const qty = addonQuantities[addon.id] || 0
+                return (
+                  <div 
+                    key={addon.id}
+                    className={`border rounded-xl p-4 flex justify-between items-center mb-3 transition-colors ${
+                      qty > 0 
+                        ? 'border-pink-500 bg-pink-50' 
+                        : 'border-neutral-200'
+                    }`}
+                  >
+                    <div>
+                      <h3 className="font-semibold text-neutral-900">{addon.name}</h3>
+                      <p className="text-neutral-500 text-sm">{addon.description}</p>
+                      <p className="text-pink-600 font-medium mt-1">+RM {addon.price} {addon.unit}</p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={() => updateQuantity(addon.id, -1)}
+                        className="w-8 h-8 rounded-full border border-neutral-300 flex items-center justify-center text-neutral-600 hover:bg-neutral-100 disabled:opacity-50"
+                        disabled={qty === 0}
+                      >
+                        -
+                      </button>
+                      <span className="w-8 text-center font-medium">{qty}</span>
+                      <button
+                        type="button"
+                        onClick={() => updateQuantity(addon.id, 1)}
+                        className="w-8 h-8 rounded-full bg-[#FF1493] text-white flex items-center justify-center hover:opacity-90"
+                      >
+                        +
+                      </button>
+                    </div>
                   </div>
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                    selectedAddons.includes(addon.id)
-                      ? 'bg-[#FF1493] text-white'
-                      : 'bg-neutral-100 text-neutral-400'
-                  }`}>
-                    {selectedAddons.includes(addon.id) ? (
-                      <Check className="w-5 h-5" />
-                    ) : (
-                      <Plus className="w-5 h-5" />
-                    )}
-                  </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           </div>
 
