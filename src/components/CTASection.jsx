@@ -11,7 +11,7 @@ export default function CTASection() {
           <h2 className="text-4xl md:text-6xl font-bold text-white mb-6">
             Ready to Elevate Your Next Offsite?
           </h2>
-          <p className="text-lg text-white/80 max-w-2xl mx-auto mb-10">
+          <p className="text-lg text-black/80 max-w-2xl mx-auto mb-10">
             Join top industry leaders who trust KaFlix Space for their most important meetings and corporate events.
           </p>
           <Link
