@@ -23,7 +23,7 @@ const amenities = [
   { icon: Coffee, label: 'Artisan Coffee' },
 ]
 
-const add-ons = [
+const addOns = [
   { id: 1, name: 'Premium Catering (Lunch & Tea)', description: 'Artisan buffet setup', price: 50, unit: '/pax' },
   { id: 2, name: 'Dedicated AV Technician', description: 'On-site support for the entire duration', price: 150, unit: '/flat' },
   { id: 3, name: 'Extended Whiteboard Setup', description: '3 extra mobile glass whiteboards', price: 50, unit: '/flat' },
@@ -36,7 +36,7 @@ export default function VenueDetails() {
 
   const basePrice = space ? parseInt(space.price.replace('RM', '')) : 0
   const addonsTotal = selectedAddons.reduce((sum, addonId) => {
-    const addon = add-ons.find(a => a.id === addonId)
+    const addon = addOns.find(a => a.id === addonId)
     return sum + (addon ? addon.price : 0)
   }, 0)
   const totalPrice = basePrice + addonsTotal
