@@ -46,6 +46,6 @@ export default function App() {
           <Route path="/login" element={user ? <Navigate to="/" /> : <Login onLogin={handleLogin} />} />
         </Routes>
       </div>
-    </HashRouter>
+    </BrowserRouter>
   )
 }
