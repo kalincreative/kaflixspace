@@ -18,7 +18,7 @@ export default function Footer() {
           <div>
             <h4 className="font-semibold text-neutral-900 mb-4">Explore</h4>
             <ul className="flex flex-col gap-2 text-sm text-neutral-500">
-              <li><Link to="/booking" className="hover:text-[#FF1493]">All Spaces</Link></li>
+              <li><Link to="/spaces" className="hover:text-[#FF1493]">All Spaces</Link></li>
               <li><Link to="/" className="hover:text-[#FF1493]">Image Gallery</Link></li>
               <li><Link to="/" className="hover:text-[#FF1493]">News & Insights</Link></li>
               <li><Link to="/" className="hover:text-[#FF1493]">FAQ & Help</Link></li>

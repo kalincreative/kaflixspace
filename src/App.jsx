@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import Home from './pages/Home'
+import SpacesPage from './pages/SpacesPage'
 import Booking from './pages/Booking'
 import Admin from './pages/Admin'
 import Login from './pages/Login'
@@ -37,6 +38,7 @@ export default function App() {
         <Navbar />
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/spaces" element={<SpacesPage />} />
           <Route path="/gallery" element={<Home />} />
           <Route path="/news" element={<Home />} />
           <Route path="/contact" element={<Home />} />

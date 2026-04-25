@@ -46,7 +46,7 @@ export default function RoomsSection() {
           <p className="text-[#101010]/60 max-w-2xl mx-auto text-lg">
             Discover fully equipped training rooms and executive boardrooms tailored to inspire focus, collaboration, and breakthrough moments.
           </p>
-          <Link to="/booking" className="absolute right-0 bottom-0 text-[#FF1493] text-sm font-medium hover:underline hidden md:block">
+          <Link to="/spaces" className="absolute right-0 bottom-0 text-[#FF1493] text-sm font-medium hover:underline hidden md:block">
             View all spaces →
           </Link>
         </div>

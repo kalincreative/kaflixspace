@@ -23,7 +23,7 @@ export default function Navbar() {
           </Link>
 
           <div className="hidden md:flex items-center gap-6 absolute left-1/2 -translate-x-1/2">
-            <Link to="/" className="transition-colors">Spaces</Link>
+            <Link to="/spaces" className="transition-colors">Spaces</Link>
             <Link to="/gallery" className="transition-colors">Gallery</Link>
             <Link to="/news" className="transition-colors">News</Link>
             <Link to="/contact" className="transition-colors">Contact</Link>
