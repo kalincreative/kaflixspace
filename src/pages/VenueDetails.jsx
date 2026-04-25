@@ -48,13 +48,6 @@ export default function VenueDetails() {
       <div className="h-[400px] md:h-[500px] w-full relative">
         <img src={space.image} alt={space.name} className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-        <Link
-          to="/spaces"
-          className="absolute top-6 left-6 flex items-center gap-2 px-4 py-2 bg-white/90 backdrop-blur-sm rounded-full text-neutral-900 hover:bg-white transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Back
-        </Link>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-12">
