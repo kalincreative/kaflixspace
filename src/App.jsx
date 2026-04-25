@@ -7,6 +7,8 @@ import Admin from './pages/Admin'
 import Login from './pages/Login'
 import Navbar from './components/Navbar'
 import VenueDetails from './pages/VenueDetails'
+import { ReservationProvider } from './context/ReservationContext'
+import ReservationDrawer from './components/ReservationDrawer'
 
 export default function App() {
   const [user, setUser] = useState(null)
@@ -35,21 +37,24 @@ export default function App() {
 
   return (
     <BrowserRouter>
-      <div className="min-h-screen bg-[#F5F5F5]">
-        <Navbar />
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/spaces/:id" element={<VenueDetails />} />
-          <Route path="/spaces" element={<SpacesPage />} />
-          <Route path="/gallery" element={<Home />} />
-          <Route path="/news" element={<Home />} />
-          <Route path="/contact" element={<Home />} />
-          <Route path="/booking/:roomId" element={<Booking />} />
-          <Route path="/booking" element={<Booking />} />
-          <Route path="/admin" element={user?.isAdmin ? <Admin /> : <Navigate to="/login" />} />
-          <Route path="/login" element={user ? <Navigate to="/" /> : <Login onLogin={handleLogin} />} />
-        </Routes>
-      </div>
+      <ReservationProvider>
+        <div className="min-h-screen bg-[#F5F5F5]">
+          <Navbar />
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/spaces/:id" element={<VenueDetails />} />
+            <Route path="/spaces" element={<SpacesPage />} />
+            <Route path="/gallery" element={<Home />} />
+            <Route path="/news" element={<Home />} />
+            <Route path="/contact" element={<Home />} />
+            <Route path="/booking/:roomId" element={<Booking />} />
+            <Route path="/booking" element={<Booking />} />
+            <Route path="/admin" element={user?.isAdmin ? <Admin /> : <Navigate to="/login" />} />
+            <Route path="/login" element={user ? <Navigate to="/" /> : <Login onLogin={handleLogin} />} />
+          </Routes>
+          <ReservationDrawer />
+        </div>
+      </ReservationProvider>
     </BrowserRouter>
   )
 }

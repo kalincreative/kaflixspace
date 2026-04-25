@@ -1,6 +1,7 @@
 import { useParams, Link } from 'react-router-dom'
 import { useState } from 'react'
-import { Users, MapPin, Monitor, Wifi, PenTool, Volume2, Coffee, Plus, Check, ShoppingCart } from 'lucide-react'
+import { Users, MapPin, Monitor, Wifi, PenTool, Volume2, Coffee, Plus, ShoppingCart, AlertCircle } from 'lucide-react'
+import { useReservation } from '../context/ReservationContext'
 
 const spaces = [
   { id: 1, name: 'Grand Seminar Hall', capacity: 120, price: 'RM150', image: '/Spaces/Grand Seminar Hall.png', location: 'Level 3, Tower A', description: 'Our flagship Grand Seminar Hall is an expansive, architecturally stunning venue designed for large-scale conferences, keynote presentations, and corporate events. Featuring a 200-inch 4K projection wall, professional-grade acoustics, and seating for up to 120 guests, this space sets the stage for unforgettable moments. The floor-to-ceiling glass windows flood the room with natural light, while the dark wood paneling and premium carpet create an atmosphere of sophistication and focus.' },
@@ -32,7 +33,10 @@ const addOns = [
 export default function VenueDetails() {
   const { id } = useParams()
   const space = spaces.find(s => s.id === Number(id))
+  const { addToCart, setIsOpen, cart } = useReservation()
   const [addonQuantities, setAddonQuantities] = useState({})
+  const [formData, setFormData] = useState({ date: '', timeSlot: '', name: '', email: '' })
+  const [errors, setErrors] = useState({})
 
   const basePrice = space ? parseInt(space.price.replace('RM', '')) : 0
   const addonsTotal = Object.entries(addonQuantities).reduce((sum, [addonId, qty]) => {
@@ -40,7 +44,7 @@ export default function VenueDetails() {
     return sum + (addon ? addon.price * qty : 0)
   }, 0)
   const totalPrice = basePrice + addonsTotal
-  const reservationCount = Object.values(addonQuantities).reduce((a, b) => a + b, 0)
+  const reservationCount = cart.length
 
   const updateQuantity = (addonId, change) => {
     setAddonQuantities(prev => {
@@ -52,6 +56,46 @@ export default function VenueDetails() {
       }
       return { ...prev, [addonId]: next }
     })
+  }
+
+  const validateForm = () => {
+    const newErrors = {}
+    if (!formData.date) newErrors.date = 'Date is required'
+    if (!formData.timeSlot) newErrors.timeSlot = 'Time slot is required'
+    if (!formData.name) newErrors.name = 'Name is required'
+    if (!formData.email) newErrors.email = 'Email is required'
+    else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = 'Invalid email'
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+
+  const handleAddToReservation = (e) => {
+    e.preventDefault()
+    if (!validateForm()) return
+
+    const selectedAddons = Object.entries(addonQuantities)
+      .filter(([_, qty]) => qty > 0)
+      .map(([addonId, qty]) => {
+        const addon = addOns.find(a => a.id === Number(addonId))
+        return { ...addon, qty }
+      })
+
+    addToCart({
+      spaceId: space.id,
+      spaceName: space.name,
+      date: formData.date,
+      timeSlot: formData.timeSlot,
+      name: formData.name,
+      email: formData.email,
+      addons: selectedAddons,
+      basePrice,
+      addonsTotal,
+      totalPrice,
+    })
+
+    setAddonQuantities({})
+    setFormData({ date: '', timeSlot: '', name: '', email: '' })
+    setIsOpen(true)
   }
 
   if (!space) {
@@ -162,23 +206,32 @@ export default function VenueDetails() {
                 <span className="text-neutral-500">/hr</span>
               </div>
 
-              <form className="space-y-4">
+              <form className="space-y-4" onSubmit={handleAddToReservation}>
                 <div>
                   <label className="block text-sm font-medium text-neutral-700 mb-2">Date</label>
                   <input
                     type="date"
-                    className="w-full px-4 py-3 rounded-lg border border-neutral-200 focus:outline-none focus:ring-2 focus:ring-[#FF1493]/50"
+                    value={formData.date}
+                    onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                    className={`w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2 focus:ring-[#FF1493]/50 ${errors.date ? 'border-red-500' : 'border-neutral-200'}`}
                   />
+                  {errors.date && <p className="text-red-500 text-xs mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{errors.date}</p>}
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-neutral-700 mb-2">Time Slot</label>
-                  <select className="w-full px-4 py-3 rounded-lg border border-neutral-200 focus:outline-none focus:ring-2 focus:ring-[#FF1493]/50">
+                  <select
+                    value={formData.timeSlot}
+                    onChange={(e) => setFormData({ ...formData, timeSlot: e.target.value })}
+                    className={`w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2 focus:ring-[#FF1493]/50 ${errors.timeSlot ? 'border-red-500' : 'border-neutral-200'}`}
+                  >
+                    <option value="">Select a time slot</option>
                     <option>09:00 AM - 12:00 PM</option>
                     <option>12:00 PM - 03:00 PM</option>
                     <option>03:00 PM - 06:00 PM</option>
                     <option>06:00 PM - 09:00 PM</option>
                   </select>
+                  {errors.timeSlot && <p className="text-red-500 text-xs mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{errors.timeSlot}</p>}
                 </div>
 
                 <div>
@@ -186,8 +239,11 @@ export default function VenueDetails() {
                   <input
                     type="text"
                     placeholder="Your name"
-                    className="w-full px-4 py-3 rounded-lg border border-neutral-200 focus:outline-none focus:ring-2 focus:ring-[#FF1493]/50"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    className={`w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2 focus:ring-[#FF1493]/50 ${errors.name ? 'border-red-500' : 'border-neutral-200'}`}
                   />
+                  {errors.name && <p className="text-red-500 text-xs mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{errors.name}</p>}
                 </div>
 
                 <div>
@@ -195,8 +251,11 @@ export default function VenueDetails() {
                   <input
                     type="email"
                     placeholder="you@company.com"
-                    className="w-full px-4 py-3 rounded-lg border border-neutral-200 focus:outline-none focus:ring-2 focus:ring-[#FF1493]/50"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    className={`w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2 focus:ring-[#FF1493]/50 ${errors.email ? 'border-red-500' : 'border-neutral-200'}`}
                   />
+                  {errors.email && <p className="text-red-500 text-xs mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{errors.email}</p>}
                 </div>
 
                 {addonsTotal > 0 && (
@@ -222,6 +281,7 @@ export default function VenueDetails() {
 
                 <button
                   type="button"
+                  onClick={() => setIsOpen(true)}
                   className="w-full py-2 text-pink-500 hover:bg-pink-50 rounded-lg mt-2 flex items-center justify-center gap-2 font-medium"
                 >
                   <ShoppingCart className="w-4 h-4" />
