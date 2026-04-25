@@ -39,7 +39,7 @@ export default function SpacesPage() {
     <div className="min-h-screen pt-20">
       <section className="py-16 bg-neutral-50">
         <div className="max-w-7xl mx-auto px-4 text-center">
-          <h1 className="text-4xl font-bold text-neutral-900 mb-4">Our Premium Collection</h1>
+          <h1 className="text-4xl font-bold text-neutral-900 mb-4">Our Premium Spaces</h1>
           <p className="text-neutral-600 max-w-2xl mx-auto">
             Explore 10 world-class environments engineered for focus, creativity, and breakthrough moments.
           </p>
