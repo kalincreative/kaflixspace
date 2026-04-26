@@ -30,7 +30,7 @@ export default function Navbar() {
           </div>
 
           <Link
-            to="/booking"
+            to="/spaces"
             className="hidden md:block px-4 py-2 text-sm font-medium bg-[#FF1493] text-white rounded-lg"
           >
             Book Now
@@ -51,7 +51,7 @@ export default function Navbar() {
           <Link to="/gallery" className="block py-2">Gallery</Link>
           <Link to="/news" className="block py-2">News</Link>
           <Link to="/contact" className="block py-2">Contact</Link>
-          <Link to="/booking" className="block py-2 text-[#FF1493] font-medium">Book Now</Link>
+          <Link to="/spaces" className="block py-2 text-[#FF1493] font-medium">Book Now</Link>
         </div>
       )}
     </nav>
