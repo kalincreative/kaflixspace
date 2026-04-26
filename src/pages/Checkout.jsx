@@ -33,10 +33,14 @@ export default function Checkout() {
     
     try {
       for (const item of cart) {
+        const dateStr = item.date
+        const [year, month, day] = dateStr.split('-')
+        const formattedDate = `${day}-${month}-${year}`
+        
         await createBooking({
           clientName: formData.name,
           spaceName: item.spaceName,
-          bookingDate: item.date,
+          bookingDate: formattedDate,
           totalPrice: item.totalPrice
         })
       }
