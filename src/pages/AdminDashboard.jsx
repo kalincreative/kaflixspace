@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { LayoutDashboard, Calendar, ChevronDown, Users, Home, Wallet, TrendingUp, CheckCircle, XCircle, LogOut, CreditCard, BarChart3, CalendarDays, Loader2, ChevronLeft, ChevronRight, CalendarRange, Search, User, Mail, Phone } from 'lucide-react'
 import { supabase, getBookings, updateBookingStatus as supabaseUpdateStatus, getClients } from '../lib/supabase'
 
@@ -13,15 +14,28 @@ const sidebarLinks = [
 ]
 
 export default function AdminDashboard() {
+  const location = useLocation()
+  const navigate = useNavigate()
   const [bookings, setBookings] = useState([])
   const [clients, setClients] = useState([])
   const [loading, setLoading] = useState(true)
   const [clientsLoading, setClientsLoading] = useState(true)
-  const [activeLink, setActiveLink] = useState('all-bookings')
   const [openDropdowns, setOpenDropdowns] = useState({ bookings: true, finance: false })
   const [currentMonth, setCurrentMonth] = useState(new Date())
   const [statusFilter, setStatusFilter] = useState('all')
   const [clientSearch, setClientSearch] = useState('')
+
+  const getActiveLinkFromPath = (path) => {
+    if (path.includes('/calendar')) return 'calendar'
+    if (path.includes('/clients')) return 'clients'
+    if (path.includes('/spaces')) return 'spaces'
+    if (path.includes('/bookings')) return 'all-bookings'
+    if (path.includes('/finance/payment')) return 'payment'
+    if (path.includes('/finance/report')) return 'report'
+    return 'all-bookings'
+  }
+
+  const [activeLink, setActiveLink] = useState(getActiveLinkFromPath(location.pathname))
 
   useEffect(() => {
     fetchBookings()
@@ -154,11 +168,16 @@ export default function AdminDashboard() {
     return clients.reduce((max, c) => parseFloat(c.total_spent || 0) > parseFloat(max.total_spent || 0) ? c : max, clients[0])
   }, [clients])
 
+  const handleMenuClick = (item) => {
+    setActiveLink(item.id)
+    navigate(item.path)
+  }
+
   const MenuItem = ({ item }) => {
     const isActive = activeLink === item.id
     return (
       <button
-        onClick={() => setActiveLink(item.id)}
+        onClick={() => handleMenuClick(item)}
         className={`w-full flex items-center justify-between px-4 py-2.5 rounded-lg transition-colors ${
           isActive ? 'bg-pink-50 text-pink-600 font-medium border-l-2 border-pink-500' : 'text-neutral-600 hover:bg-neutral-100'
         }`}
@@ -175,7 +194,7 @@ export default function AdminDashboard() {
     const isActive = activeLink === item.id
     return (
       <button
-        onClick={() => setActiveLink(item.id)}
+        onClick={() => handleMenuClick(item)}
         className={`w-full flex items-center gap-3 pl-10 pr-4 py-2 rounded-lg transition-colors ${
           isActive ? 'bg-pink-50 text-pink-600 font-medium' : 'text-neutral-500 hover:bg-neutral-100'
         }`}
