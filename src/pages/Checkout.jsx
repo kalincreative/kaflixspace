@@ -1,8 +1,13 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Check, CreditCard, Building, X, CheckCircle, Loader2 } from 'lucide-react'
+import { Check, CreditCard, Building, CheckCircle, Loader2 } from 'lucide-react'
+import emailjs from '@emailjs/browser'
 import { useReservation } from '../context/ReservationContext'
 import { createBooking, createOrUpdateClient } from '../lib/supabase'
+
+const EMAILJS_SERVICE_ID = 'service_736nhhr'
+const EMAILJS_TEMPLATE_ID = 'template_hor7sba'
+const EMAILJS_PUBLIC_KEY = 'Y6Fn0DNkn3OKRxmeb8'
 
 export default function Checkout() {
   const navigate = useNavigate()
@@ -28,6 +33,29 @@ export default function Checkout() {
     if (!formData.company) newErrors.company = 'Company name is required'
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
+  }
+
+  const sendConfirmationEmail = async (bookingData) => {
+    try {
+      const templateParams = {
+        client_name: bookingData.clientName,
+        space_name: bookingData.spaceName,
+        date: bookingData.date,
+        time: bookingData.timeRange,
+        location: bookingData.location || 'KaFlix Space HQ',
+        email: bookingData.clientEmail,
+      }
+      
+      await emailjs.send(
+        EMAILJS_SERVICE_ID,
+        EMAILJS_TEMPLATE_ID,
+        templateParams,
+        EMAILJS_PUBLIC_KEY
+      )
+      console.log('Confirmation email sent successfully')
+    } catch (error) {
+      console.error('Failed to send confirmation email:', error)
+    }
   }
 
   const handleSubmit = async (e) => {
@@ -57,6 +85,15 @@ export default function Checkout() {
           totalPrice: item.totalPrice
         })
         totalSpent += item.totalPrice
+
+        await sendConfirmationEmail({
+          clientName: formData.name,
+          clientEmail: formData.email,
+          spaceName: item.spaceName,
+          location: item.location,
+          date: formattedDate,
+          timeRange: item.timeRange,
+        })
       }
       
       await createOrUpdateClient({
@@ -85,7 +122,7 @@ export default function Checkout() {
           </div>
           <h2 className="text-2xl font-bold text-neutral-900 mb-2">Booking Confirmed!</h2>
           <p className="text-neutral-600 mb-6">
-            Your reservation has been submitted. We'll send a confirmation email shortly.
+            Your reservation has been submitted. A confirmation email has been sent to {formData.email}.
           </p>
           <Link
             to="/"
