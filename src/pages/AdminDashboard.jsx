@@ -18,6 +18,7 @@ export default function AdminDashboard() {
   const [activeLink, setActiveLink] = useState('all-bookings')
   const [openDropdowns, setOpenDropdowns] = useState({ bookings: true, finance: false })
   const [currentMonth, setCurrentMonth] = useState(new Date())
+  const [statusFilter, setStatusFilter] = useState('all')
 
   useEffect(() => {
     fetchBookings()
@@ -69,10 +70,15 @@ export default function AdminDashboard() {
 
   const getBookingsForDate = (date) => {
     if (!date) return []
-    const dateStr = date.toISOString().split('T')[0]
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    const dateStr = `${year}-${month}-${day}`
     return bookings.filter(b => {
       const bookingDate = b.booking_date ? b.booking_date.split('T')[0] : b.booking_date
-      return bookingDate === dateStr
+      const matchesDate = bookingDate === dateStr
+      const matchesStatus = statusFilter === 'all' || b.status === statusFilter
+      return matchesDate && matchesStatus
     })
   }
 
@@ -288,22 +294,34 @@ export default function AdminDashboard() {
           <div className="bg-white rounded-xl shadow-sm border border-neutral-100 overflow-hidden">
             <div className="p-6 border-b border-neutral-100 flex items-center justify-between">
               <h3 className="text-lg font-semibold text-neutral-900">Monthly Calendar</h3>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={prevMonth}
-                  className="w-8 h-8 rounded-full bg-neutral-100 flex items-center justify-center hover:bg-neutral-200 transition-colors"
+              <div className="flex items-center gap-4">
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  className="px-3 py-2 text-sm border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500"
                 >
-                  <ChevronLeft className="w-4 h-4 text-neutral-600" />
-                </button>
-                <span className="text-sm font-medium text-neutral-700 min-w-[140px] text-center">
-                  {formatMonthYear(currentMonth)}
-                </span>
-                <button
-                  onClick={nextMonth}
-                  className="w-8 h-8 rounded-full bg-neutral-100 flex items-center justify-center hover:bg-neutral-200 transition-colors"
-                >
-                  <ChevronRight className="w-4 h-4 text-neutral-600" />
-                </button>
+                  <option value="all">All Status</option>
+                  <option value="pending">Pending</option>
+                  <option value="approved">Approved</option>
+                  <option value="rejected">Rejected</option>
+                </select>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={prevMonth}
+                    className="w-8 h-8 rounded-full bg-neutral-100 flex items-center justify-center hover:bg-neutral-200 transition-colors"
+                  >
+                    <ChevronLeft className="w-4 h-4 text-neutral-600" />
+                  </button>
+                  <span className="text-sm font-medium text-neutral-700 min-w-[140px] text-center">
+                    {formatMonthYear(currentMonth)}
+                  </span>
+                  <button
+                    onClick={nextMonth}
+                    className="w-8 h-8 rounded-full bg-neutral-100 flex items-center justify-center hover:bg-neutral-200 transition-colors"
+                  >
+                    <ChevronRight className="w-4 h-4 text-neutral-600" />
+                  </button>
+                </div>
               </div>
             </div>
             <div className="grid grid-cols-7 gap-px bg-neutral-200">
