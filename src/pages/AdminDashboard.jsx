@@ -84,17 +84,15 @@ export default function AdminDashboard() {
     const day = String(date.getDate()).padStart(2, '0')
     const month = String(date.getMonth() + 1).padStart(2, '0')
     const year = date.getFullYear()
-    const targetDate = `${day}-${month}-${year}`
+    const targetDate = `${year}-${month}-${day}`
     
-    const filtered = bookings.filter(b => {
+    return bookings.filter(b => {
       const raw = b.booking_date || ''
       const storedDate = raw.split('T')[0].trim()
       const matchesDate = storedDate === targetDate
       const matchesStatus = statusFilter === 'all' || b.status === statusFilter
       return matchesDate && matchesStatus
     })
-    
-    return filtered
   }
 
   const formatDate = (dateStr) => {
