@@ -132,22 +132,31 @@ export default function TrackBooking() {
                     <h3 className="font-semibold text-neutral-900 text-lg">{booking.space_name}</h3>
                     <div className="flex items-center gap-2 text-neutral-500 mt-1">
                       <MapPin className="w-4 h-4" />
-                      <span>{booking.location || 'Location TBD'}</span>
+                      <span>{booking.location || 'N/A'}</span>
                     </div>
                   </div>
                   {getStatusBadge(booking.status)}
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 mb-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
                   <div className="flex items-center gap-2">
                     <Calendar className="w-4 h-4 text-neutral-400" />
                     <span className="text-sm text-neutral-600">{formatDate(booking.booking_date)}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Clock className="w-4 h-4 text-neutral-400" />
-                    <span className="text-sm text-neutral-600">{booking.time_range || 'Time TBD'}</span>
+                    <span className="text-sm text-neutral-600">{booking.time_range || 'N/A'}</span>
                   </div>
                 </div>
+
+                {(booking.usage_hours || booking.total_booking_hours) && (
+                  <div className="bg-neutral-50 rounded-lg px-3 py-2 mb-4">
+                    <p className="text-xs text-neutral-500">
+                      {booking.usage_hours || 0} Hour{booking.usage_hours !== 1 ? 's' : ''} Usage + {booking.prep_hours || 1} Hour Prep
+                      = <span className="font-medium text-neutral-700">{booking.total_booking_hours || 0} hrs</span> Total Booking
+                    </p>
+                  </div>
+                )}
 
                 <div className="flex justify-between items-center pt-4 border-t border-neutral-100">
                   <div>
