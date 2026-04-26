@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Check, CreditCard, Building, X, CheckCircle } from 'lucide-react'
+import { Check, CreditCard, Building, X, CheckCircle, Loader2 } from 'lucide-react'
 import { useReservation } from '../context/ReservationContext'
 import { createBooking, createOrUpdateClient } from '../lib/supabase'
 
@@ -17,6 +17,8 @@ export default function Checkout() {
   })
   const [errors, setErrors] = useState({})
   const [showSuccess, setShowSuccess] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState(null)
 
   const validate = () => {
     const newErrors = {}
@@ -32,12 +34,15 @@ export default function Checkout() {
     e.preventDefault()
     if (!validate()) return
     
+    setSubmitting(true)
+    setSubmitError(null)
+    
     try {
       let totalSpent = 0
       for (const item of cart) {
         const dateStr = item.date
         const [year, month, day] = dateStr.split('-')
-        const formattedDate = `${day}-${month}-${year}`
+        const formattedDate = `${year}-${month}-${day}`
         
         await createBooking({
           clientName: formData.name,
@@ -59,6 +64,9 @@ export default function Checkout() {
       setShowSuccess(true)
     } catch (error) {
       console.error('Error creating booking:', error)
+      setSubmitError(error.message || 'Failed to create booking. Please try again.')
+    } finally {
+      setSubmitting(false)
     }
   }
 
@@ -229,10 +237,21 @@ export default function Checkout() {
 
               <button
                 type="submit"
-                className="w-full py-4 bg-[#FF1493] text-white rounded-lg hover:opacity-90 transition-colors font-semibold text-lg"
+                disabled={submitting}
+                className="w-full py-4 bg-[#FF1493] text-white rounded-lg hover:opacity-90 transition-colors font-semibold text-lg flex items-center justify-center gap-2 disabled:opacity-50"
               >
-                Complete Booking
+                {submitting ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    Processing...
+                  </>
+                ) : (
+                  'Complete Booking'
+                )}
               </button>
+              {submitError && (
+                <p className="text-red-500 text-sm text-center">{submitError}</p>
+              )}
             </form>
           </div>
         </div>
