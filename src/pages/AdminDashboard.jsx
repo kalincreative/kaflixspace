@@ -1,7 +1,8 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { LayoutDashboard, Calendar, ChevronDown, Users, Home, Wallet, TrendingUp, CheckCircle, XCircle, LogOut, CreditCard, BarChart3, CalendarDays, Loader2, ChevronLeft, ChevronRight, CalendarRange, Search, User, Mail, Phone } from 'lucide-react'
+import { LayoutDashboard, Calendar, ChevronDown, Users, Home, Wallet, TrendingUp, CheckCircle, XCircle, LogOut, CreditCard, BarChart3, CalendarDays, Loader2, ChevronLeft, ChevronRight, CalendarRange, Search, User, Mail, Phone, Wrench, AlertCircle } from 'lucide-react'
 import { supabase, getBookings, updateBookingStatus as supabaseUpdateStatus, getClients } from '../lib/supabase'
+import { rooms } from '../lib/data'
 
 const sidebarLinks = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, path: '/admin/dashboard' },
@@ -24,6 +25,10 @@ export default function AdminDashboard() {
   const [currentMonth, setCurrentMonth] = useState(new Date())
   const [statusFilter, setStatusFilter] = useState('all')
   const [clientSearch, setClientSearch] = useState('')
+  const [spaces, setSpaces] = useState(() => {
+    const stored = localStorage.getItem('kaflix_spaces_maintenance')
+    return stored ? JSON.parse(stored) : {}
+  })
 
   const getActiveLinkFromPath = (path) => {
     if (path.includes('/calendar')) return 'calendar'
@@ -63,6 +68,34 @@ export default function AdminDashboard() {
       setClientsLoading(false)
     }
   }
+
+  const toggleMaintenance = (spaceId) => {
+    const updated = { ...spaces, [spaceId]: !spaces[spaceId] }
+    setSpaces(updated)
+    localStorage.setItem('kaflix_spaces_maintenance', JSON.stringify(updated))
+  }
+
+  const getRevenueByMonth = () => {
+    const last5Months = []
+    const today = new Date()
+    for (let i = 4; i >= 0; i--) {
+      const date = new Date(today.getFullYear(), today.getMonth() - i, 1)
+      const month = date.toLocaleDateString('en-US', { month: 'short' })
+      const year = date.getFullYear()
+      const monthKey = `${year}-${String(date.getMonth() + 1).padStart(2, '0')}`
+      
+      const revenue = bookings
+        .filter(b => b.status === 'approved' && b.booking_date?.startsWith(monthKey))
+        .reduce((sum, b) => sum + parseFloat(b.total_price || 0), 0)
+      
+      last5Months.push({ month, revenue })
+    }
+    return last5Months
+  }
+
+  const approvedBookings = useMemo(() => {
+    return bookings.filter(b => b.status === 'approved')
+  }, [bookings])
 
   const toggleDropdown = (dropdown) => {
     setOpenDropdowns(prev => ({ ...prev, [dropdown]: !prev[dropdown] }))
@@ -266,7 +299,12 @@ export default function AdminDashboard() {
       <main className="flex-1 p-8">
         <div className="mb-8">
           <h2 className="text-2xl font-bold text-neutral-900">
-            {activeLink === 'all-bookings' ? 'Booking Management' : activeLink === 'calendar' ? 'Calendar View' : 'Clients'}
+            {activeLink === 'all-bookings' ? 'Booking Management' : 
+             activeLink === 'calendar' ? 'Calendar View' :
+             activeLink === 'clients' ? 'Clients' :
+             activeLink === 'spaces' ? 'Spaces Management' :
+             activeLink === 'payment' ? 'Payment History' :
+             activeLink === 'report' ? 'Revenue Report' : 'Dashboard'}
           </h2>
         </div>
 
@@ -352,202 +390,131 @@ export default function AdminDashboard() {
                   </tbody>
                 </table>
               </div>
+)}
+          </div>
+        )}
+
+        {activeLink === 'spaces' && (
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {rooms.map((space) => (
+                <div 
+                  key={space.id} 
+                  className={`bg-white rounded-xl overflow-hidden shadow-sm border transition-opacity ${spaces[space.id] ? 'opacity-50 border-red-200' : 'border-neutral-100'}`}
+                >
+                  <div className="relative h-40">
+                    <img src={space.image} alt={space.name} className="w-full h-full object-cover" />
+                    {spaces[space.id] && (
+                      <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                        <div className="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-medium flex items-center gap-2">
+                          <Wrench className="w-4 h-4" />
+                          Under Maintenance
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  <div className="p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="font-semibold text-neutral-900">{space.name}</h3>
+                      <span className="text-pink-600 font-medium">RM{space.pricePerHour}/hr</span>
+                    </div>
+                    <p className="text-sm text-neutral-500 mb-3">Capacity: {space.capacity} people</p>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-neutral-500">
+                        {spaces[space.id] ? 'Marked unavailable' : 'Available'}
+                      </span>
+                      <button
+                        onClick={() => toggleMaintenance(space.id)}
+                        className={`relative w-12 h-6 rounded-full transition-colors ${spaces[space.id] ? 'bg-red-500' : 'bg-green-500'}`}
+                      >
+                        <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${spaces[space.id] ? 'translate-x-7' : 'translate-x-1'}`} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {activeLink === 'payment' && (
+          <div className="bg-white rounded-xl shadow-sm border border-neutral-100 overflow-hidden">
+            {approvedBookings.length === 0 ? (
+              <div className="flex flex-col items-center justify-center p-12 text-center">
+                <CreditCard className="w-16 h-16 text-neutral-300 mb-4" />
+                <p className="text-lg font-medium text-neutral-600">No approved bookings</p>
+                <p className="text-neutral-500 mt-1">Approved bookings will appear here for payment tracking.</p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-neutral-50">
+                    <tr>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-neutral-600">Client</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-neutral-600">Space</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-neutral-600">Date</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-neutral-600">Amount</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-neutral-600">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-neutral-100">
+                    {approvedBookings.map((booking) => (
+                      <tr key={booking.id} className="hover:bg-neutral-50 transition-colors">
+                        <td className="px-6 py-4 text-sm text-neutral-900">{booking.client_name}</td>
+                        <td className="px-6 py-4 text-sm text-neutral-600">{booking.space_name}</td>
+                        <td className="px-6 py-4 text-sm text-neutral-600">{formatDate(booking.booking_date)}</td>
+                        <td className="px-6 py-4 text-sm text-neutral-900 font-medium">RM {booking.total_price}</td>
+                        <td className="px-6 py-4">
+                          <span className="inline-flex px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                            Paid
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             )}
           </div>
         )}
 
-        {activeLink === 'calendar' && (
-          <div className="bg-white rounded-xl shadow-sm border border-neutral-100 overflow-hidden">
-            <div className="p-6 border-b border-neutral-100 flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-neutral-900">Monthly Calendar</h3>
-              <div className="flex items-center gap-4">
-                <select
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                  className="px-3 py-2 text-sm border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500"
-                >
-                  <option value="all">All Status</option>
-                  <option value="pending">Pending</option>
-                  <option value="approved">Approved</option>
-                  <option value="rejected">Rejected</option>
-                </select>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={prevMonth}
-                    className="w-8 h-8 rounded-full bg-neutral-100 flex items-center justify-center hover:bg-neutral-200 transition-colors"
-                  >
-                    <ChevronLeft className="w-4 h-4 text-neutral-600" />
-                  </button>
-                  <span className="text-sm font-medium text-neutral-700 min-w-[140px] text-center">
-                    {formatMonthYear(currentMonth)}
-                  </span>
-                  <button
-                    onClick={nextMonth}
-                    className="w-8 h-8 rounded-full bg-neutral-100 flex items-center justify-center hover:bg-neutral-200 transition-colors"
-                  >
-                    <ChevronRight className="w-4 h-4 text-neutral-600" />
-                  </button>
-                </div>
-              </div>
-            </div>
-            <div className="grid grid-cols-7 gap-px bg-neutral-200">
-              {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-                <div key={day} className="bg-neutral-50 p-3 text-center text-sm font-medium text-neutral-500">
-                  {day}
-                </div>
-              ))}
-              {getDaysInMonth(currentMonth).map((date, idx) => {
-                const dayBookings = getBookingsForDate(date)
-                return (
-                  <div
-                    key={idx}
-                    className={`bg-white min-h-[120px] p-2 ${!date ? 'bg-neutral-50' : ''}`}
-                  >
-                    {date && (
-                      <>
-                        <div className="text-sm font-medium text-neutral-500 mb-2">
-                          {date.getDate()}
-                        </div>
-                        <div className="space-y-1">
-                          {dayBookings.slice(0, 3).map((booking) => (
-                            <div
-                              key={booking.id}
-                              className={`text-xs px-2 py-1 rounded truncate ${
-                                booking.status === 'approved' ? 'bg-green-100 text-green-700' :
-                                booking.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
-                                'bg-red-100 text-red-700'
-                              }`}
-                            >
-                              {booking.client_name} - {booking.space_name}
-                            </div>
-                          ))}
-                          {dayBookings.length > 3 && (
-                            <div className="text-xs text-neutral-500 pl-2">
-                              +{dayBookings.length - 3} more
-                            </div>
-                          )}
-                        </div>
-                      </>
-                    )}
-                  </div>
-                )
-              })}
-            </div>
-          </div>
-        )}
-
-        {activeLink === 'clients' && (
+        {activeLink === 'report' && (
           <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-white rounded-xl p-6 shadow-sm border border-neutral-100">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-neutral-500 text-sm">Total Unique Clients</p>
-                    <p className="text-2xl font-bold text-neutral-900 mt-1">{clients.length}</p>
-                  </div>
-                  <div className="w-12 h-12 rounded-full bg-[#FF1493]/10 flex items-center justify-center">
-                    <Users className="w-6 h-6 text-[#FF1493]" />
-                  </div>
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-neutral-100">
+              <h3 className="text-lg font-semibold text-neutral-900 mb-6">Revenue Overview (Last 5 Months)</h3>
+              <div className="space-y-4">
+                {getRevenueByMonth().map((item, idx) => {
+                  const maxRevenue = Math.max(...getRevenueByMonth().map(m => m.revenue), 1)
+                  const percentage = (item.revenue / maxRevenue) * 100
+                  return (
+                    <div key={idx} className="flex items-center gap-4">
+                      <span className="w-16 text-sm font-medium text-neutral-600">{item.month}</span>
+                      <div className="flex-1 bg-neutral-100 rounded-full h-8 overflow-hidden">
+                        <div 
+                          className="h-full bg-gradient-to-r from-pink-500 to-pink-600 rounded-full flex items-center justify-end pr-3 transition-all duration-500"
+                          style={{ width: `${Math.max(percentage, 5)}%` }}
+                        >
+                          <span className="text-white text-sm font-medium">
+                            {item.revenue > 0 ? `RM ${item.revenue.toLocaleString()}` : ''}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+              <div className="mt-6 pt-6 border-t border-neutral-100 flex justify-between">
+                <div>
+                  <p className="text-sm text-neutral-500">Total Revenue</p>
+                  <p className="text-2xl font-bold text-neutral-900">
+                    RM {approvedBookings.reduce((sum, b) => sum + parseFloat(b.total_price || 0), 0).toLocaleString()}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-neutral-500">Approved Bookings</p>
+                  <p className="text-2xl font-bold text-neutral-900">{approvedBookings.length}</p>
                 </div>
               </div>
-              <div className="bg-white rounded-xl p-6 shadow-sm border border-neutral-100">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-neutral-500 text-sm">Top Spender</p>
-                    <p className="text-xl font-bold text-neutral-900 mt-1">
-                      {topSpender?.full_name || '-'}
-                    </p>
-                    <p className="text-sm text-green-600 mt-1">
-                      RM {topSpender ? parseFloat(topSpender.total_spent || 0).toLocaleString() : 0}
-                    </p>
-                  </div>
-                  <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
-                    <TrendingUp className="w-6 h-6 text-green-600" />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="relative">
-              <div className="absolute left-4 top-1/2 -translate-y-1/2">
-                <Search className="w-5 h-5 text-neutral-400" />
-              </div>
-              <input
-                type="text"
-                placeholder="Search by name or email..."
-                value={clientSearch}
-                onChange={(e) => setClientSearch(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 border border-neutral-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent"
-              />
-            </div>
-
-            <div className="bg-white rounded-xl shadow-sm border border-neutral-100 overflow-hidden">
-              {clientsLoading ? (
-                <div className="flex items-center justify-center p-12">
-                  <Loader2 className="w-8 h-8 text-pink-500 animate-spin" />
-                </div>
-              ) : clients.length === 0 ? (
-                <div className="flex flex-col items-center justify-center p-12 text-center">
-                  <User className="w-16 h-16 text-neutral-300 mb-4" />
-                  <p className="text-lg font-medium text-neutral-600">No clients yet</p>
-                  <p className="text-neutral-500 mt-1">Clients will appear here once they make their first booking.</p>
-                </div>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead className="bg-neutral-50">
-                      <tr>
-                        <th className="px-6 py-4 text-left text-sm font-semibold text-neutral-600">Client Name</th>
-                        <th className="px-6 py-4 text-left text-sm font-semibold text-neutral-600">Contact</th>
-                        <th className="px-6 py-4 text-left text-sm font-semibold text-neutral-600">Total Bookings</th>
-                        <th className="px-6 py-4 text-left text-sm font-semibold text-neutral-600">Total Spent</th>
-                        <th className="px-6 py-4 text-left text-sm font-semibold text-neutral-600">Join Date</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-neutral-100">
-                      {clients
-                        .filter(c => 
-                          !clientSearch || 
-                          c.full_name?.toLowerCase().includes(clientSearch.toLowerCase()) ||
-                          c.email?.toLowerCase().includes(clientSearch.toLowerCase())
-                        )
-                        .map((client) => (
-                          <tr key={client.id} className="hover:bg-neutral-50 transition-colors">
-                            <td className="px-6 py-4">
-                              <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-full bg-pink-100 flex items-center justify-center">
-                                  <span className="text-pink-600 font-medium">
-                                    {client.full_name?.charAt(0).toUpperCase()}
-                                  </span>
-                                </div>
-                                <span className="text-sm text-neutral-900 font-medium">{client.full_name}</span>
-                              </div>
-                            </td>
-                            <td className="px-6 py-4">
-                              <div className="space-y-1">
-                                <div className="flex items-center gap-2 text-sm text-neutral-600">
-                                  <Mail className="w-4 h-4 text-neutral-400" />
-                                  {client.email}
-                                </div>
-                                {client.phone && (
-                                  <div className="flex items-center gap-2 text-sm text-neutral-600">
-                                    <Phone className="w-4 h-4 text-neutral-400" />
-                                    {client.phone}
-                                  </div>
-                                )}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 text-sm text-neutral-900">{client.total_bookings}</td>
-                            <td className="px-6 py-4 text-sm text-neutral-900 font-medium">RM {parseFloat(client.total_spent || 0).toLocaleString()}</td>
-                            <td className="px-6 py-4 text-sm text-neutral-600">
-                              {client.created_at ? new Date(client.created_at).toLocaleDateString('en-GB') : '-'}
-                            </td>
-                          </tr>
-                        ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
             </div>
           </div>
         )}
