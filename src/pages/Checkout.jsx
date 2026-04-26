@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Check, CreditCard, Building, X, CheckCircle } from 'lucide-react'
 import { useReservation } from '../context/ReservationContext'
-import { createBooking } from '../lib/supabase'
+import { createBooking, createOrUpdateClient } from '../lib/supabase'
 
 export default function Checkout() {
   const navigate = useNavigate()
@@ -32,6 +32,7 @@ export default function Checkout() {
     if (!validate()) return
     
     try {
+      let totalSpent = 0
       for (const item of cart) {
         const dateStr = item.date
         const [year, month, day] = dateStr.split('-')
@@ -43,7 +44,16 @@ export default function Checkout() {
           bookingDate: formattedDate,
           totalPrice: item.totalPrice
         })
+        totalSpent += item.totalPrice
       }
+      
+      await createOrUpdateClient({
+        name: formData.name,
+        email: formData.email,
+        phone: formData.company,
+        totalPrice: totalSpent
+      })
+      
       clearCart()
       setShowSuccess(true)
     } catch (error) {

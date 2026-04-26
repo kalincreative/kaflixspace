@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
-import { LayoutDashboard, Calendar, ChevronDown, Users, Home, Wallet, TrendingUp, CheckCircle, XCircle, LogOut, CreditCard, BarChart3, CalendarDays, Loader2, ChevronLeft, ChevronRight, CalendarRange } from 'lucide-react'
-import { supabase, getBookings, updateBookingStatus as supabaseUpdateStatus } from '../lib/supabase'
+import { LayoutDashboard, Calendar, ChevronDown, Users, Home, Wallet, TrendingUp, CheckCircle, XCircle, LogOut, CreditCard, BarChart3, CalendarDays, Loader2, ChevronLeft, ChevronRight, CalendarRange, Search, User, Mail, Phone } from 'lucide-react'
+import { supabase, getBookings, updateBookingStatus as supabaseUpdateStatus, getClients } from '../lib/supabase'
 
 const sidebarLinks = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, path: '/admin/dashboard' },
@@ -14,14 +14,18 @@ const sidebarLinks = [
 
 export default function AdminDashboard() {
   const [bookings, setBookings] = useState([])
+  const [clients, setClients] = useState([])
   const [loading, setLoading] = useState(true)
+  const [clientsLoading, setClientsLoading] = useState(true)
   const [activeLink, setActiveLink] = useState('all-bookings')
   const [openDropdowns, setOpenDropdowns] = useState({ bookings: true, finance: false })
   const [currentMonth, setCurrentMonth] = useState(new Date())
   const [statusFilter, setStatusFilter] = useState('all')
+  const [clientSearch, setClientSearch] = useState('')
 
   useEffect(() => {
     fetchBookings()
+    fetchClients()
   }, [])
 
   const fetchBookings = async () => {
@@ -32,6 +36,17 @@ export default function AdminDashboard() {
       console.error('Error fetching bookings:', error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const fetchClients = async () => {
+    try {
+      const data = await getClients()
+      setClients(data)
+    } catch (error) {
+      console.error('Error fetching clients:', error)
+    } finally {
+      setClientsLoading(false)
     }
   }
 
@@ -68,7 +83,7 @@ export default function AdminDashboard() {
     return days
   }
 
-const getBookingsForDate = (date) => {
+  const getBookingsForDate = (date) => {
     if (!date) return []
     const day = String(date.getDate()).padStart(2, '0')
     const month = String(date.getMonth() + 1).padStart(2, '0')
@@ -112,6 +127,11 @@ const getBookingsForDate = (date) => {
     { label: 'Pending Requests', value: pendingCount, icon: Calendar },
     { label: 'Total Revenue', value: `RM ${totalRevenue.toLocaleString()}`, icon: Wallet },
   ], [bookings, pendingCount, totalRevenue])
+
+  const topSpender = useMemo(() => {
+    if (clients.length === 0) return null
+    return clients.reduce((max, c) => parseFloat(c.total_spent || 0) > parseFloat(max.total_spent || 0) ? c : max, clients[0])
+  }, [clients])
 
   const MenuItem = ({ item }) => {
     const isActive = activeLink === item.id
@@ -208,7 +228,7 @@ const getBookingsForDate = (date) => {
       <main className="flex-1 p-8">
         <div className="mb-8">
           <h2 className="text-2xl font-bold text-neutral-900">
-            {activeLink === 'all-bookings' ? 'Booking Management' : 'Calendar View'}
+            {activeLink === 'all-bookings' ? 'Booking Management' : activeLink === 'calendar' ? 'Calendar View' : 'Clients'}
           </h2>
         </div>
 
@@ -374,6 +394,122 @@ const getBookingsForDate = (date) => {
                   </div>
                 )
               })}
+            </div>
+          </div>
+        )}
+
+        {activeLink === 'clients' && (
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="bg-white rounded-xl p-6 shadow-sm border border-neutral-100">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-neutral-500 text-sm">Total Unique Clients</p>
+                    <p className="text-2xl font-bold text-neutral-900 mt-1">{clients.length}</p>
+                  </div>
+                  <div className="w-12 h-12 rounded-full bg-[#FF1493]/10 flex items-center justify-center">
+                    <Users className="w-6 h-6 text-[#FF1493]" />
+                  </div>
+                </div>
+              </div>
+              <div className="bg-white rounded-xl p-6 shadow-sm border border-neutral-100">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-neutral-500 text-sm">Top Spender</p>
+                    <p className="text-xl font-bold text-neutral-900 mt-1">
+                      {topSpender?.full_name || '-'}
+                    </p>
+                    <p className="text-sm text-green-600 mt-1">
+                      RM {topSpender ? parseFloat(topSpender.total_spent || 0).toLocaleString() : 0}
+                    </p>
+                  </div>
+                  <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
+                    <TrendingUp className="w-6 h-6 text-green-600" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="relative">
+              <div className="absolute left-4 top-1/2 -translate-y-1/2">
+                <Search className="w-5 h-5 text-neutral-400" />
+              </div>
+              <input
+                type="text"
+                placeholder="Search by name or email..."
+                value={clientSearch}
+                onChange={(e) => setClientSearch(e.target.value)}
+                className="w-full pl-12 pr-4 py-3 border border-neutral-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+              />
+            </div>
+
+            <div className="bg-white rounded-xl shadow-sm border border-neutral-100 overflow-hidden">
+              {clientsLoading ? (
+                <div className="flex items-center justify-center p-12">
+                  <Loader2 className="w-8 h-8 text-pink-500 animate-spin" />
+                </div>
+              ) : clients.length === 0 ? (
+                <div className="flex flex-col items-center justify-center p-12 text-center">
+                  <User className="w-16 h-16 text-neutral-300 mb-4" />
+                  <p className="text-lg font-medium text-neutral-600">No clients yet</p>
+                  <p className="text-neutral-500 mt-1">Clients will appear here once they make their first booking.</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-neutral-50">
+                      <tr>
+                        <th className="px-6 py-4 text-left text-sm font-semibold text-neutral-600">Client Name</th>
+                        <th className="px-6 py-4 text-left text-sm font-semibold text-neutral-600">Contact</th>
+                        <th className="px-6 py-4 text-left text-sm font-semibold text-neutral-600">Total Bookings</th>
+                        <th className="px-6 py-4 text-left text-sm font-semibold text-neutral-600">Total Spent</th>
+                        <th className="px-6 py-4 text-left text-sm font-semibold text-neutral-600">Join Date</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-neutral-100">
+                      {clients
+                        .filter(c => 
+                          !clientSearch || 
+                          c.full_name?.toLowerCase().includes(clientSearch.toLowerCase()) ||
+                          c.email?.toLowerCase().includes(clientSearch.toLowerCase())
+                        )
+                        .map((client) => (
+                          <tr key={client.id} className="hover:bg-neutral-50 transition-colors">
+                            <td className="px-6 py-4">
+                              <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-full bg-pink-100 flex items-center justify-center">
+                                  <span className="text-pink-600 font-medium">
+                                    {client.full_name?.charAt(0).toUpperCase()}
+                                  </span>
+                                </div>
+                                <span className="text-sm text-neutral-900 font-medium">{client.full_name}</span>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4">
+                              <div className="space-y-1">
+                                <div className="flex items-center gap-2 text-sm text-neutral-600">
+                                  <Mail className="w-4 h-4 text-neutral-400" />
+                                  {client.email}
+                                </div>
+                                {client.phone && (
+                                  <div className="flex items-center gap-2 text-sm text-neutral-600">
+                                    <Phone className="w-4 h-4 text-neutral-400" />
+                                    {client.phone}
+                                  </div>
+                                )}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 text-sm text-neutral-900">{client.total_bookings}</td>
+                            <td className="px-6 py-4 text-sm text-neutral-900 font-medium">RM {parseFloat(client.total_spent || 0).toLocaleString()}</td>
+                            <td className="px-6 py-4 text-sm text-neutral-600">
+                              {client.created_at ? new Date(client.created_at).toLocaleDateString('en-GB') : '-'}
+                            </td>
+                          </tr>
+                        ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           </div>
         )}
