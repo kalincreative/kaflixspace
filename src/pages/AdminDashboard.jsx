@@ -100,12 +100,15 @@ export default function AdminDashboard() {
     const year = date.getFullYear()
     const targetDate = `${year}-${month}-${day}`
     
+    console.log('Target date:', targetDate, '| Checking against:', bookings.map(b => b.booking_date))
+    
     return bookings.filter(b => {
       const raw = b.booking_date || ''
       const storedDate = raw.split('T')[0].trim()
-      const matchesDate = storedDate === targetDate
+      const matches = storedDate === targetDate
+      if (matches) console.log('Match found:', b.client_name, storedDate)
       const matchesStatus = statusFilter === 'all' || b.status === statusFilter
-      return matchesDate && matchesStatus
+      return matches && matchesStatus
     })
   }
 
