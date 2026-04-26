@@ -74,7 +74,7 @@ export default function Contact() {
                 <MessageCircle className="w-7 h-7 text-[#FF2D8C]" />
               </div>
               <h3 className="text-lg font-semibold text-neutral-900 mb-2">Threads</h3>
-              <a href="https://threads.net/@kaflixspace" target="_blank" rel="noopener noreferrer" className="text-neutral-500 hover:underline">
+              <a href="https://threads.net/@kaflixspace" target="_blank" rel="noopener noreferrer" className="text-[#FF2D8C] hover:underline">
                 @kaflixspace
               </a>
             </div>
