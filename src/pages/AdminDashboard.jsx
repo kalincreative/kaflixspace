@@ -1,14 +1,6 @@
-import { useState } from 'react'
-import { LayoutDashboard, Calendar, ChevronDown, Users, Home, Wallet, TrendingUp, CheckCircle, XCircle, LogOut, FileText, CreditCard, BarChart3, CalendarDays } from 'lucide-react'
-
-const initialBookings = [
-  { id: 1, clientName: 'Ahmad Razak', space: 'Grand Seminar Hall', date: '2026-05-15', price: 'RM 450', status: 'pending' },
-  { id: 2, clientName: 'Sarah Chen', space: 'Executive Boardroom', date: '2026-05-10', price: 'RM 240', status: 'approved' },
-  { id: 3, clientName: 'TechCorp Sdn Bhd', space: 'Tech Innovation Lab', date: '2026-05-08', price: 'RM 360', status: 'rejected' },
-  { id: 4, clientName: 'Jennifer Lee', space: 'Creative Workshop', date: '2026-05-20', price: 'RM 180', status: 'pending' },
-  { id: 5, clientName: 'Digital Solutions', space: 'Pitching Theatre', date: '2026-05-12', price: 'RM 330', status: 'approved' },
-  { id: 6, clientName: 'Mark Tan', space: 'Podcast Studio', date: '2026-05-18', price: 'RM 120', status: 'pending' },
-]
+import { useState, useEffect } from 'react'
+import { LayoutDashboard, Calendar, ChevronDown, Users, Home, Wallet, TrendingUp, CheckCircle, XCircle, LogOut, CreditCard, BarChart3, CalendarDays, Loader2 } from 'lucide-react'
+import { supabase, getBookings, updateBookingStatus as supabaseUpdateStatus } from '../lib/supabase'
 
 const sidebarLinks = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, path: '/admin/dashboard' },
@@ -21,22 +13,45 @@ const sidebarLinks = [
 ]
 
 export default function AdminDashboard() {
-  const [bookings, setBookings] = useState(initialBookings)
+  const [bookings, setBookings] = useState([])
+  const [loading, setLoading] = useState(true)
   const [activeLink, setActiveLink] = useState('all-bookings')
   const [openDropdowns, setOpenDropdowns] = useState({ bookings: true, finance: false })
+
+  useEffect(() => {
+    fetchBookings()
+  }, [])
+
+  const fetchBookings = async () => {
+    try {
+      const data = await getBookings()
+      setBookings(data)
+    } catch (error) {
+      console.error('Error fetching bookings:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const toggleDropdown = (dropdown) => {
     setOpenDropdowns(prev => ({ ...prev, [dropdown]: !prev[dropdown] }))
   }
 
-  const updateStatus = (id, newStatus) => {
-    setBookings(bookings.map(booking => 
-      booking.id === id ? { ...booking, status: newStatus } : booking
-    ))
+  const updateStatus = async (id, newStatus) => {
+    try {
+      await supabaseUpdateStatus(id, newStatus)
+      setBookings(bookings.map(booking => 
+        booking.id === id ? { ...booking, status: newStatus } : booking
+      ))
+    } catch (error) {
+      console.error('Error updating status:', error)
+    }
   }
 
   const pendingCount = bookings.filter(b => b.status === 'pending').length
-  const totalRevenue = bookings.filter(b => b.status === 'approved').reduce((acc, b) => acc + parseInt(b.price.replace(/[^0-9]/g, '')), 0)
+  const totalRevenue = bookings
+    .filter(b => b.status === 'approved')
+    .reduce((acc, b) => acc + parseFloat(b.total_price || b.price || 0), 0)
 
   const stats = [
     { label: 'Total Bookings', value: bookings.length, icon: Calendar },
@@ -158,59 +173,65 @@ export default function AdminDashboard() {
         </div>
 
         <div className="bg-white rounded-xl shadow-sm border border-neutral-100 overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-neutral-50">
-                <tr>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-neutral-600">Client Name</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-neutral-600">Space</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-neutral-600">Date</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-neutral-600">Total Price</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-neutral-600">Status</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-neutral-600">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-neutral-100">
-                {bookings.map((booking) => (
-                  <tr key={booking.id} className="hover:bg-neutral-50 transition-colors">
-                    <td className="px-6 py-4 text-sm text-neutral-900">{booking.clientName}</td>
-                    <td className="px-6 py-4 text-sm text-neutral-600">{booking.space}</td>
-                    <td className="px-6 py-4 text-sm text-neutral-600">{booking.date}</td>
-                    <td className="px-6 py-4 text-sm text-neutral-900 font-medium">{booking.price}</td>
-                    <td className="px-6 py-4">
-                      <span className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${
-                        booking.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
-                        booking.status === 'approved' ? 'bg-green-100 text-green-700' :
-                        'bg-red-100 text-red-700'
-                      }`}>
-                        {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      {booking.status === 'pending' && (
-                        <div className="flex items-center gap-2">
-                          <button
-                            onClick={() => updateStatus(booking.id, 'approved')}
-                            className="w-8 h-8 rounded-full bg-green-100 text-green-600 flex items-center justify-center hover:bg-green-200 transition-colors"
-                            title="Approve"
-                          >
-                            <CheckCircle className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => updateStatus(booking.id, 'rejected')}
-                            className="w-8 h-8 rounded-full bg-red-100 text-red-600 flex items-center justify-center hover:bg-red-200 transition-colors"
-                            title="Reject"
-                          >
-                            <XCircle className="w-4 h-4" />
-                          </button>
-                        </div>
-                      )}
-                    </td>
+          {loading ? (
+            <div className="flex items-center justify-center p-12">
+              <Loader2 className="w-8 h-8 text-pink-500 animate-spin" />
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-neutral-50">
+                  <tr>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-neutral-600">Client Name</th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-neutral-600">Space</th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-neutral-600">Date</th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-neutral-600">Total Price</th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-neutral-600">Status</th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-neutral-600">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="divide-y divide-neutral-100">
+                  {bookings.map((booking) => (
+                    <tr key={booking.id} className="hover:bg-neutral-50 transition-colors">
+                      <td className="px-6 py-4 text-sm text-neutral-900">{booking.client_name}</td>
+                      <td className="px-6 py-4 text-sm text-neutral-600">{booking.space_name}</td>
+                      <td className="px-6 py-4 text-sm text-neutral-600">{booking.booking_date}</td>
+                      <td className="px-6 py-4 text-sm text-neutral-900 font-medium">RM {booking.total_price}</td>
+                      <td className="px-6 py-4">
+                        <span className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${
+                          booking.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+                          booking.status === 'approved' ? 'bg-green-100 text-green-700' :
+                          'bg-red-100 text-red-700'
+                        }`}>
+                          {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        {booking.status === 'pending' && (
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => updateStatus(booking.id, 'approved')}
+                              className="w-8 h-8 rounded-full bg-green-100 text-green-600 flex items-center justify-center hover:bg-green-200 transition-colors"
+                              title="Approve"
+                            >
+                              <CheckCircle className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => updateStatus(booking.id, 'rejected')}
+                              className="w-8 h-8 rounded-full bg-red-100 text-red-600 flex items-center justify-center hover:bg-red-200 transition-colors"
+                              title="Reject"
+                            >
+                              <XCircle className="w-4 h-4" />
+                            </button>
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       </main>
     </div>

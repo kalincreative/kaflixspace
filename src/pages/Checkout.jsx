@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Check, CreditCard, Building, X, CheckCircle } from 'lucide-react'
 import { useReservation } from '../context/ReservationContext'
+import { createBooking } from '../lib/supabase'
 
 export default function Checkout() {
   const navigate = useNavigate()
@@ -26,10 +27,24 @@ export default function Checkout() {
     return Object.keys(newErrors).length === 0
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     if (!validate()) return
-    setShowSuccess(true)
+    
+    try {
+      for (const item of cart) {
+        await createBooking({
+          clientName: formData.name,
+          spaceName: item.spaceName,
+          bookingDate: item.date,
+          totalPrice: item.totalPrice
+        })
+      }
+      clearCart()
+      setShowSuccess(true)
+    } catch (error) {
+      console.error('Error creating booking:', error)
+    }
   }
 
   if (showSuccess) {
