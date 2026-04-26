@@ -99,24 +99,18 @@ export default function VenueDetails() {
     return timeSlots.slice(startIdx + 1)
   }
 
-  const calculateHours = () => {
+  const calculateUsageHours = () => {
     if (!formData.startTime || !formData.endTime) return 0
     const startHour = parseInt(formData.startTime.split(':')[0])
     const endHour = parseInt(formData.endTime.split(':')[0])
-    const usageHours = Math.max(0, endHour - startHour)
-    return usageHours + 1
-  }
-
-  const calculateTotalHours = () => {
-    const usageHours = calculateHours()
-    return usageHours + 1
+    return Math.max(0, endHour - startHour)
   }
 
   const basePrice = space ? parseInt(space.price.replace('RM', '')) : 0
-  const totalUsageHours = calculateHours()
+  const usageHours = calculateUsageHours()
   const prepHours = 1
-  const totalBookingHours = totalUsageHours + prepHours
-  const usageTotal = basePrice * totalUsageHours
+  const totalBookingHours = usageHours + prepHours
+  const usageTotal = basePrice * usageHours
   const prepTotal = basePrice * prepHours
   const addonsTotal = Object.entries(addonQuantities).reduce((sum, [addonId, qty]) => {
     const addon = addOns.find(a => a.id === Number(addonId))
@@ -176,7 +170,7 @@ export default function VenueDetails() {
       startTime: formData.startTime,
       endTime: formData.endTime,
       timeRange: formatTimeRange(),
-      usageHours: totalUsageHours,
+      usageHours: usageHours,
       prepHours: prepHours,
       totalBookingHours: totalBookingHours,
       addons: selectedAddons,
@@ -301,7 +295,7 @@ export default function VenueDetails() {
               </div>
               <div className="text-sm text-neutral-600 mb-4 space-y-1">
                 <p>Rate: RM{basePrice}/hr</p>
-                <p>Usage: {totalUsageHours} hr {formatTimeRange()}</p>
+                <p>Usage: {usageHours} hr {formatTimeRange()}</p>
                 <p>Prep time: +{prepHours} hr</p>
                 <p className="font-semibold text-neutral-900">Total booking: {totalBookingHours} hrs</p>
               </div>
