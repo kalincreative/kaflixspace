@@ -4,6 +4,8 @@ import Home from './pages/Home'
 import SpacesPage from './pages/SpacesPage'
 import Booking from './pages/Booking'
 import Admin from './pages/Admin'
+import AdminLogin from './pages/AdminLogin'
+import AdminDashboard from './pages/AdminDashboard'
 import Login from './pages/Login'
 import Navbar from './components/Navbar'
 import VenueDetails from './pages/VenueDetails'
@@ -45,8 +47,8 @@ export default function App() {
     <BrowserRouter>
       <ReservationProvider>
         <div className="flex flex-col min-h-screen bg-[#F5F5F5]">
-          <Navbar />
-          <main className="flex-grow">
+          {!window.location.pathname.startsWith('/admin') && <Navbar />}
+          <main className={window.location.pathname.startsWith('/admin') ? '' : 'flex-grow'}>
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/spaces/:id" element={<VenueDetails />} />
@@ -58,12 +60,14 @@ export default function App() {
               <Route path="/contact" element={<Contact />} />
               <Route path="/booking/:roomId" element={<Booking />} />
               <Route path="/booking" element={<Booking />} />
-              <Route path="/admin" element={user?.isAdmin ? <Admin /> : <Navigate to="/login" />} />
+              <Route path="/admin/login" element={<AdminLogin />} />
+              <Route path="/admin/dashboard" element={<AdminDashboard />} />
+              <Route path="/admin" element={user?.isAdmin ? <Admin /> : <Navigate to="/admin/login" />} />
               <Route path="/login" element={user ? <Navigate to="/" /> : <Login onLogin={handleLogin} />} />
             </Routes>
           </main>
-          <ReservationDrawer />
-          <Footer />
+          {!window.location.pathname.startsWith('/admin') && <ReservationDrawer />}
+          {!window.location.pathname.startsWith('/admin') && <Footer />}
         </div>
       </ReservationProvider>
     </BrowserRouter>
