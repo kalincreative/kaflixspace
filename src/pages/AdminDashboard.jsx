@@ -45,7 +45,6 @@ export default function AdminDashboard() {
   const fetchBookings = async () => {
     try {
       const data = await getBookings()
-      console.log('Bookings loaded:', data)
       setBookings(data)
     } catch (error) {
       console.error('Error fetching bookings:', error)
@@ -100,15 +99,11 @@ export default function AdminDashboard() {
     const year = date.getFullYear()
     const targetDate = `${year}-${month}-${day}`
     
-    console.log('Target date:', targetDate, '| Checking against:', bookings.map(b => b.booking_date))
-    
     return bookings.filter(b => {
       const raw = b.booking_date || ''
       const storedDate = raw.split('T')[0].trim()
-      const matches = storedDate === targetDate
-      if (matches) console.log('Match found:', b.client_name, storedDate)
       const matchesStatus = statusFilter === 'all' || b.status === statusFilter
-      return matches && matchesStatus
+      return storedDate === targetDate && matchesStatus
     })
   }
 
