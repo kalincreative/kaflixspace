@@ -38,12 +38,13 @@ export default function Checkout() {
   const sendConfirmationEmail = async (bookingData) => {
     try {
       const templateParams = {
-        client_name: bookingData.clientName,
+        to_email: bookingData.clientEmail,
+        to_name: bookingData.clientName,
         space_name: bookingData.spaceName,
-        date: bookingData.date,
-        time: bookingData.timeRange,
+        booking_date: bookingData.date,
+        time_slot: bookingData.timeRange,
         location: bookingData.location || 'KaFlix Space HQ',
-        email: bookingData.clientEmail,
+        client_name: bookingData.clientName,
       }
       
       await emailjs.send(
@@ -54,7 +55,7 @@ export default function Checkout() {
       )
       console.log('Confirmation email sent successfully')
     } catch (error) {
-      console.error('Failed to send confirmation email:', error)
+      console.warn('EmailJS error (non-blocking):', error?.text || error?.message || error)
     }
   }
 
