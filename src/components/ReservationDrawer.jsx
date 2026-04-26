@@ -44,8 +44,11 @@ export default function ReservationDrawer() {
                     </button>
                   </div>
                   <p className="text-sm text-neutral-600 mb-2">
-                    {item.date} • {item.timeSlot}
+                    {item.date} • {item.timeRange}
                   </p>
+                  <div className="text-xs text-neutral-500 mb-2">
+                    {item.usageHours} hr usage + {item.prepHours} hr prep = {item.totalBookingHours} hrs total
+                  </div>
                   {item.addons && item.addons.length > 0 && (
                     <ul className="text-sm text-neutral-500 mb-2">
                       {item.addons.map((addon, idx) => (

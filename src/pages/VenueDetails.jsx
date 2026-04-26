@@ -37,7 +37,7 @@ export default function VenueDetails() {
   const space = spaces.find(s => s.id === Number(id))
   const { addToCart, setIsOpen, cart } = useReservation()
   const [addonQuantities, setAddonQuantities] = useState({})
-  const [formData, setFormData] = useState({ date: '', timeSlot: '', name: '', email: '' })
+  const [formData, setFormData] = useState({ date: '', startTime: '', endTime: '', name: '', email: '' })
   const [errors, setErrors] = useState({})
   const [maintenanceSpaces, setMaintenanceSpaces] = useState({})
 
@@ -75,12 +75,54 @@ export default function VenueDetails() {
     )
   }
 
+  const timeSlots = [
+    { value: '08:00', label: '08:00 AM' },
+    { value: '09:00', label: '09:00 AM' },
+    { value: '10:00', label: '10:00 AM' },
+    { value: '11:00', label: '11:00 AM' },
+    { value: '12:00', label: '12:00 PM' },
+    { value: '13:00', label: '01:00 PM' },
+    { value: '14:00', label: '02:00 PM' },
+    { value: '15:00', label: '03:00 PM' },
+    { value: '16:00', label: '04:00 PM' },
+    { value: '17:00', label: '05:00 PM' },
+    { value: '18:00', label: '06:00 PM' },
+    { value: '19:00', label: '07:00 PM' },
+    { value: '20:00', label: '08:00 PM' },
+    { value: '21:00', label: '09:00 PM' },
+  ]
+
+  const getEndTimeOptions = () => {
+    if (!formData.startTime) return timeSlots
+    const startIdx = timeSlots.findIndex(t => t.value === formData.startTime)
+    if (startIdx === -1) return timeSlots
+    return timeSlots.slice(startIdx + 1)
+  }
+
+  const calculateHours = () => {
+    if (!formData.startTime || !formData.endTime) return 0
+    const startHour = parseInt(formData.startTime.split(':')[0])
+    const endHour = parseInt(formData.endTime.split(':')[0])
+    const usageHours = Math.max(0, endHour - startHour)
+    return usageHours + 1
+  }
+
+  const calculateTotalHours = () => {
+    const usageHours = calculateHours()
+    return usageHours + 1
+  }
+
   const basePrice = space ? parseInt(space.price.replace('RM', '')) : 0
+  const totalUsageHours = calculateHours()
+  const prepHours = 1
+  const totalBookingHours = totalUsageHours + prepHours
+  const usageTotal = basePrice * totalUsageHours
+  const prepTotal = basePrice * prepHours
   const addonsTotal = Object.entries(addonQuantities).reduce((sum, [addonId, qty]) => {
     const addon = addOns.find(a => a.id === Number(addonId))
     return sum + (addon ? addon.price * qty : 0)
   }, 0)
-  const totalPrice = basePrice + addonsTotal
+  const totalPrice = (basePrice * totalBookingHours) + addonsTotal
   const reservationCount = cart.length
 
   const updateQuantity = (addonId, change) => {
@@ -98,9 +140,21 @@ export default function VenueDetails() {
   const validateForm = () => {
     const newErrors = {}
     if (!formData.date) newErrors.date = 'Date is required'
-    if (!formData.timeSlot) newErrors.timeSlot = 'Time slot is required'
+    if (!formData.startTime) newErrors.startTime = 'Start time is required'
+    if (!formData.endTime) newErrors.endTime = 'End time is required'
+    if (formData.startTime && formData.endTime) {
+      const startHour = parseInt(formData.startTime.split(':')[0])
+      const endHour = parseInt(formData.endTime.split(':')[0])
+      if (endHour <= startHour) newErrors.endTime = 'End time must be after start time'
+    }
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
+  }
+
+  const formatTimeRange = () => {
+    const startLabel = timeSlots.find(t => t.value === formData.startTime)?.label || formData.startTime
+    const endLabel = timeSlots.find(t => t.value === formData.endTime)?.label || formData.endTime
+    return `${startLabel} - ${endLabel}`
   }
 
   const handleAddToReservation = (e) => {
@@ -119,15 +173,22 @@ export default function VenueDetails() {
       spaceName: space.name,
       location: space.location,
       date: formData.date,
-      timeSlot: formData.timeSlot,
+      startTime: formData.startTime,
+      endTime: formData.endTime,
+      timeRange: formatTimeRange(),
+      usageHours: totalUsageHours,
+      prepHours: prepHours,
+      totalBookingHours: totalBookingHours,
       addons: selectedAddons,
       basePrice,
+      usageTotal,
+      prepTotal,
       addonsTotal,
       totalPrice,
     })
 
     setAddonQuantities({})
-    setFormData({ date: '', timeSlot: '', name: '', email: '' })
+    setFormData({ date: '', startTime: '', endTime: '', name: '', email: '' })
     setIsOpen(true)
   }
 
@@ -234,9 +295,15 @@ export default function VenueDetails() {
 
           <div className="lg:col-span-1">
             <div className="sticky top-24 bg-white rounded-2xl shadow-xl border border-neutral-100 p-6">
-              <div className="mb-6">
+              <div className="mb-4">
                 <span className="text-3xl font-bold text-neutral-900">RM{totalPrice}</span>
-                <span className="text-neutral-500">/hr</span>
+                <span className="text-neutral-500">/total</span>
+              </div>
+              <div className="text-sm text-neutral-600 mb-4 space-y-1">
+                <p>Rate: RM{basePrice}/hr</p>
+                <p>Usage: {totalUsageHours} hr {formatTimeRange()}</p>
+                <p>Prep time: +{prepHours} hr</p>
+                <p className="font-semibold text-neutral-900">Total booking: {totalBookingHours} hrs</p>
               </div>
 
               <form className="space-y-4" onSubmit={handleAddToReservation}>
@@ -251,20 +318,35 @@ export default function VenueDetails() {
                   {errors.date && <p className="text-red-500 text-xs mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{errors.date}</p>}
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-neutral-700 mb-2">Time Slot</label>
-                  <select
-                    value={formData.timeSlot}
-                    onChange={(e) => setFormData({ ...formData, timeSlot: e.target.value })}
-                    className={`w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2 focus:ring-[#FF1493]/50 ${errors.timeSlot ? 'border-red-500' : 'border-neutral-200'}`}
-                  >
-                    <option value="">Select a time slot</option>
-                    <option>09:00 AM - 12:00 PM</option>
-                    <option>12:00 PM - 03:00 PM</option>
-                    <option>03:00 PM - 06:00 PM</option>
-                    <option>06:00 PM - 09:00 PM</option>
-                  </select>
-                  {errors.timeSlot && <p className="text-red-500 text-xs mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{errors.timeSlot}</p>}
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-sm font-medium text-neutral-700 mb-2">Start Time</label>
+                    <select
+                      value={formData.startTime}
+                      onChange={(e) => setFormData({ ...formData, startTime: e.target.value, endTime: '' })}
+                      className={`w-full px-3 py-3 rounded-lg border focus:outline-none focus:ring-2 focus:ring-[#FF1493]/50 ${errors.startTime ? 'border-red-500' : 'border-neutral-200'}`}
+                    >
+                      <option value="">Start</option>
+                      {timeSlots.map(t => (
+                        <option key={t.value} value={t.value}>{t.label}</option>
+                      ))}
+                    </select>
+                    {errors.startTime && <p className="text-red-500 text-xs mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{errors.startTime}</p>}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-neutral-700 mb-2">End Time</label>
+                    <select
+                      value={formData.endTime}
+                      onChange={(e) => setFormData({ ...formData, endTime: e.target.value })}
+                      className={`w-full px-3 py-3 rounded-lg border focus:outline-none focus:ring-2 focus:ring-[#FF1493]/50 ${errors.endTime ? 'border-red-500' : 'border-neutral-200'}`}
+                    >
+                      <option value="">End</option>
+                      {getEndTimeOptions().map(t => (
+                        <option key={t.value} value={t.value}>{t.label}</option>
+                      ))}
+                    </select>
+                    {errors.endTime && <p className="text-red-500 text-xs mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{errors.endTime}</p>}
+                  </div>
                 </div>
 
                 {addonsTotal > 0 && (
