@@ -63,12 +63,9 @@ export default function AdminLogin() {
       </div>
 
       <div className="hidden lg:block relative">
-        <video
-          src="/adminlogin.mp4"
-          autoPlay
-          loop
-          muted
-          playsInline
+        <img
+          src="/adminlogin.png"
+          alt="Admin Background"
           className="w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-black/30" />
