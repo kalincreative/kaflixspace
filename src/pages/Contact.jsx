@@ -73,14 +73,9 @@ export default function Contact() {
               <div className="w-16 h-16 rounded-full bg-pink-500/10 flex items-center justify-center mx-auto mb-4">
                 <MessageCircle className="w-7 h-7 text-[#FF2D8C]" />
               </div>
-              <h3 className="text-lg font-semibold text-neutral-900 mb-2">WhatsApp</h3>
-              <a 
-                href="https://wa.me/60123456789" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="inline-block px-6 py-2 border-2 border-[#FF2D8C] text-[#FF2D8C] rounded-full hover:bg-[#FF2D8C] hover:text-white transition-colors"
-              >
-                Chat Now
+              <h3 className="text-lg font-semibold text-neutral-900 mb-2">Threads</h3>
+              <a href="https://threads.net/@kaflixspace" target="_blank" rel="noopener noreferrer" className="text-neutral-500 hover:underline">
+                @kaflixspace
               </a>
             </div>
           </div>
