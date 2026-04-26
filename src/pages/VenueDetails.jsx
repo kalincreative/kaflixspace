@@ -101,22 +101,24 @@ export default function VenueDetails() {
 
   const calculateUsageHours = () => {
     if (!formData.startTime || !formData.endTime) return 0
-    const startHour = parseInt(formData.startTime.split(':')[0])
-    const endHour = parseInt(formData.endTime.split(':')[0])
-    return Math.max(0, endHour - startHour)
+    const startParts = formData.startTime.split(':')
+    const endParts = formData.endTime.split(':')
+    const startMinutes = parseInt(startParts[0]) * 60 + parseInt(startParts[1])
+    const endMinutes = parseInt(endParts[0]) * 60 + parseInt(endParts[1])
+    const durationMinutes = Math.max(0, endMinutes - startMinutes)
+    return durationMinutes / 60
   }
 
   const basePrice = space ? parseInt(space.price.replace('RM', '')) : 0
   const usageHours = calculateUsageHours()
-  const prepHours = 1
-  const totalBookingHours = usageHours + prepHours
+  const bufferHours = 1
+  const internalBlockHours = usageHours + bufferHours
   const usageTotal = basePrice * usageHours
-  const prepTotal = basePrice * prepHours
   const addonsTotal = Object.entries(addonQuantities).reduce((sum, [addonId, qty]) => {
     const addon = addOns.find(a => a.id === Number(addonId))
     return sum + (addon ? addon.price * qty : 0)
   }, 0)
-  const totalPrice = (basePrice * totalBookingHours) + addonsTotal
+  const totalPrice = (basePrice * usageHours) + addonsTotal
   const reservationCount = cart.length
 
   const updateQuantity = (addonId, change) => {
@@ -171,12 +173,11 @@ export default function VenueDetails() {
       endTime: formData.endTime,
       timeRange: formatTimeRange(),
       usageHours: usageHours,
-      prepHours: prepHours,
-      totalBookingHours: totalBookingHours,
+      bufferHours: bufferHours,
+      internalBlockHours: internalBlockHours,
       addons: selectedAddons,
       basePrice,
       usageTotal,
-      prepTotal,
       addonsTotal,
       totalPrice,
     })
@@ -290,14 +291,16 @@ export default function VenueDetails() {
           <div className="lg:col-span-1">
             <div className="sticky top-24 bg-white rounded-2xl shadow-xl border border-neutral-100 p-6">
               <div className="mb-4">
-                <span className="text-3xl font-bold text-neutral-900">RM{totalPrice}</span>
+                <span className="text-3xl font-bold text-neutral-900">RM{totalPrice.toFixed(2)}</span>
                 <span className="text-neutral-500">/total</span>
               </div>
               <div className="text-sm text-neutral-600 mb-4 space-y-1">
                 <p>Rate: RM{basePrice}/hr</p>
-                <p>Usage: {usageHours} hr {formatTimeRange()}</p>
-                <p>Prep time: +{prepHours} hr</p>
-                <p className="font-semibold text-neutral-900">Total booking: {totalBookingHours} hrs</p>
+                <p>Duration: {usageHours.toFixed(1)} hr(s)</p>
+                <p>{formatTimeRange()}</p>
+              </div>
+              <div className="text-xs text-neutral-500 bg-green-50 px-3 py-2 rounded-lg">
+                + Complimentary 1hr setup & cleanup buffer (FREE)
               </div>
 
               <form className="space-y-4" onSubmit={handleAddToReservation}>
