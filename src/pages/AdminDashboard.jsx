@@ -83,20 +83,36 @@ export default function AdminDashboard() {
     return days
   }
 
+const normalizeDate = (dateStr) => {
+    if (!dateStr) return ''
+    const raw = dateStr.split('T')[0].trim()
+    if (raw.includes('-')) {
+      const parts = raw.split('-')
+      if (parts[0].length === 4) {
+        return `${parts[2]}-${parts[1]}-${parts[0]}`
+      }
+      return raw
+    }
+    return raw
+  }
+
   const getBookingsForDate = (date) => {
     if (!date) return []
     const day = String(date.getDate()).padStart(2, '0')
     const month = String(date.getMonth() + 1).padStart(2, '0')
     const year = date.getFullYear()
-    const dateStrDMY = `${day}-${month}-${year}`
-    const dateStrYMD = `${year}-${month}-${day}`
+    const targetDate = `${day}-${month}-${year}`
+    
     return bookings.filter(b => {
-      const rawDate = b.booking_date || ''
-      const bookingDate = rawDate.split('T')[0]
-      const matchesDate = bookingDate === dateStrDMY || bookingDate === dateStrYMD
+      const storedDate = normalizeDate(b.booking_date)
+      const matchesDate = storedDate === targetDate
       const matchesStatus = statusFilter === 'all' || b.status === statusFilter
       return matchesDate && matchesStatus
     })
+  }
+
+  const formatDate = (dateStr) => {
+    return normalizeDate(dateStr)
   }
 
   const formatDate = (dateStr) => {
