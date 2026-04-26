@@ -10,6 +10,7 @@ export default function Checkout() {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    phone: '',
     company: '',
     requirements: '',
     paymentMethod: 'credit_card',
@@ -50,7 +51,7 @@ export default function Checkout() {
       await createOrUpdateClient({
         name: formData.name,
         email: formData.email,
-        phone: formData.company,
+        phone: formData.phone,
         totalPrice: totalSpent
       })
       
@@ -159,6 +160,17 @@ export default function Checkout() {
                   className={`w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2 focus:ring-[#FF1493]/50 ${errors.email ? 'border-red-500' : 'border-neutral-200'}`}
                 />
                 {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-neutral-700 mb-2">Phone Number</label>
+                <input
+                  type="tel"
+                  value={formData.phone}
+                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  placeholder="+60 1X XXX XXXX"
+                  className="w-full px-4 py-3 rounded-lg border border-neutral-200 focus:outline-none focus:ring-2 focus:ring-[#FF1493]/50"
+                />
               </div>
 
               <div>
