@@ -39,7 +39,7 @@ export default function Contact() {
     <div className="min-h-screen pt-20 bg-white">
       <section className="py-20 px-4 bg-white">
         <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-5xl md:text-6xl font-serif font-bold text-neutral-900 mb-6">Get in Touch</h1>
+          <h1 className="text-4xl md:text-5xl font-bold text-neutral-900 mb-4">Get in Touch</h1>
           <p className="text-neutral-500 text-lg">
             Have questions? We're here to help you create the perfect event experience.
           </p>
@@ -91,7 +91,7 @@ export default function Contact() {
         <div className="max-w-6xl mx-auto mt-20">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             <div>
-              <h2 className="text-3xl font-serif font-bold text-neutral-900 mb-8">Frequently Asked Questions</h2>
+              <h2 className="text-2xl font-bold text-neutral-900 mb-6">Frequently Asked Questions</h2>
               <div className="space-y-4">
                 {faqs.map((faq, idx) => (
                   <div 
@@ -127,7 +127,7 @@ export default function Contact() {
                   </div>
                 ) : (
                   <form onSubmit={handleSubmit} className="space-y-5">
-                    <h2 className="text-2xl font-serif font-bold text-neutral-900 mb-6">Send us a Message</h2>
+                    <h2 className="text-xl font-bold text-neutral-900 mb-6">Send us a Message</h2>
                     
                     <div>
                       <input
