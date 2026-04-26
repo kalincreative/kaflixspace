@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { LayoutDashboard, Calendar, DollarSign, Clock, CheckCircle, XCircle, LogOut, Users } from 'lucide-react'
+import { LayoutDashboard, Calendar, ChevronDown, Users, Home, Wallet, TrendingUp, CheckCircle, XCircle, LogOut, FileText, CreditCard, BarChart3, CalendarDays } from 'lucide-react'
 
 const initialBookings = [
   { id: 1, clientName: 'Ahmad Razak', space: 'Grand Seminar Hall', date: '2026-05-15', price: 'RM 450', status: 'pending' },
@@ -10,9 +10,24 @@ const initialBookings = [
   { id: 6, clientName: 'Mark Tan', space: 'Podcast Studio', date: '2026-05-18', price: 'RM 120', status: 'pending' },
 ]
 
+const sidebarLinks = [
+  { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, path: '/admin/dashboard' },
+  { id: 'all-bookings', label: 'All Bookings', icon: Calendar, path: '/admin/bookings' },
+  { id: 'calendar', label: 'Calendar View', icon: CalendarDays, path: '/admin/calendar' },
+  { id: 'clients', label: 'Clients', icon: Users, path: '/admin/clients' },
+  { id: 'spaces', label: 'Spaces', icon: Home, path: '/admin/spaces' },
+  { id: 'payment', label: 'Payment', icon: CreditCard, path: '/admin/finance/payment' },
+  { id: 'report', label: 'Report', icon: BarChart3, path: '/admin/finance/report' },
+]
+
 export default function AdminDashboard() {
   const [bookings, setBookings] = useState(initialBookings)
-  const [activeTab, setActiveTab] = useState('bookings')
+  const [activeLink, setActiveLink] = useState('all-bookings')
+  const [openDropdowns, setOpenDropdowns] = useState({ bookings: true, finance: false })
+
+  const toggleDropdown = (dropdown) => {
+    setOpenDropdowns(prev => ({ ...prev, [dropdown]: !prev[dropdown] }))
+  }
 
   const updateStatus = (id, newStatus) => {
     setBookings(bookings.map(booking => 
@@ -25,38 +40,98 @@ export default function AdminDashboard() {
 
   const stats = [
     { label: 'Total Bookings', value: bookings.length, icon: Calendar },
-    { label: 'Pending Requests', value: pendingCount, icon: Clock },
-    { label: 'Total Revenue', value: `RM ${totalRevenue.toLocaleString()}`, icon: DollarSign },
+    { label: 'Pending Requests', value: pendingCount, icon: Calendar },
+    { label: 'Total Revenue', value: `RM ${totalRevenue.toLocaleString()}`, icon: Wallet },
   ]
+
+  const MenuItem = ({ item }) => {
+    const isActive = activeLink === item.id
+    return (
+      <button
+        onClick={() => setActiveLink(item.id)}
+        className={`w-full flex items-center justify-between px-4 py-2.5 rounded-lg transition-colors ${
+          isActive ? 'bg-pink-50 text-pink-600 font-medium border-l-2 border-pink-500' : 'text-neutral-600 hover:bg-neutral-100'
+        }`}
+      >
+        <div className="flex items-center gap-3">
+          <item.icon className="w-4 h-4" />
+          <span className="text-sm">{item.label}</span>
+        </div>
+      </button>
+    )
+  }
+
+  const DropdownItem = ({ item }) => {
+    const isActive = activeLink === item.id
+    return (
+      <button
+        onClick={() => setActiveLink(item.id)}
+        className={`w-full flex items-center gap-3 pl-10 pr-4 py-2 rounded-lg transition-colors ${
+          isActive ? 'bg-pink-50 text-pink-600 font-medium' : 'text-neutral-500 hover:bg-neutral-100'
+        }`}
+      >
+        <item.icon className="w-4 h-4" />
+        <span className="text-sm">{item.label}</span>
+      </button>
+    )
+  }
 
   return (
     <div className="flex min-h-screen bg-neutral-100">
-      <aside className="w-64 bg-white border-r border-neutral-200 p-6">
-        <div className="mb-8">
+      <aside className="w-64 bg-white border-r border-neutral-200 flex flex-col">
+        <div className="p-6 border-b border-neutral-100">
           <h1 className="text-xl font-bold"><span className="text-[#FF1493]">KaFlix</span> Admin</h1>
         </div>
         
-        <nav className="space-y-2">
-          <button
-            onClick={() => setActiveTab('bookings')}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${activeTab === 'bookings' ? 'bg-[#FF1493]/10 text-[#FF1493]' : 'text-neutral-600 hover:bg-neutral-100'}`}
-          >
-            <LayoutDashboard className="w-5 h-5" />
-            Bookings
-          </button>
-          <button
-            onClick={() => setActiveTab('dashboard')}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${activeTab === 'dashboard' ? 'bg-[#FF1493]/10 text-[#FF1493]' : 'text-neutral-600 hover:bg-neutral-100'}`}
-          >
-            <Users className="w-5 h-5" />
-            Dashboard
-          </button>
-        </nav>
+        <div className="flex-1 overflow-y-auto p-4 space-y-6">
+          <MenuItem item={sidebarLinks[0]} />
+          
+          <div>
+            <button
+              onClick={() => toggleDropdown('bookings')}
+              className="w-full flex items-center justify-between px-4 py-2.5 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <Calendar className="w-4 h-4" />
+                <span className="text-sm font-medium">Bookings</span>
+              </div>
+              <ChevronDown className={`w-4 h-4 transition-transform ${openDropdowns.bookings ? 'rotate-180' : ''}`} />
+            </button>
+            {openDropdowns.bookings && (
+              <div className="mt-2 space-y-1">
+                <DropdownItem item={sidebarLinks[1]} />
+                <DropdownItem item={sidebarLinks[2]} />
+              </div>
+            )}
+          </div>
 
-        <div className="absolute bottom-6">
-          <a href="/" className="flex items-center gap-3 px-4 py-3 text-neutral-600 hover:text-red-500 transition-colors">
-            <LogOut className="w-5 h-5" />
-            Exit
+          <MenuItem item={sidebarLinks[3]} />
+          <MenuItem item={sidebarLinks[4]} />
+
+          <div>
+            <button
+              onClick={() => toggleDropdown('finance')}
+              className="w-full flex items-center justify-between px-4 py-2.5 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <TrendingUp className="w-4 h-4" />
+                <span className="text-sm font-medium">Finance</span>
+              </div>
+              <ChevronDown className={`w-4 h-4 transition-transform ${openDropdowns.finance ? 'rotate-180' : ''}`} />
+            </button>
+            {openDropdowns.finance && (
+              <div className="mt-2 space-y-1">
+                <DropdownItem item={sidebarLinks[5]} />
+                <DropdownItem item={sidebarLinks[6]} />
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="p-4 border-t border-neutral-100">
+          <a href="/" className="flex items-center gap-3 px-4 py-2.5 text-neutral-600 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors">
+            <LogOut className="w-4 h-4" />
+            <span className="text-sm">Exit</span>
           </a>
         </div>
       </aside>

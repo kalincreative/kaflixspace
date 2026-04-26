@@ -62,6 +62,12 @@ export default function App() {
               <Route path="/booking" element={<Booking />} />
               <Route path="/admin/login" element={<AdminLogin />} />
               <Route path="/admin/dashboard" element={<AdminDashboard />} />
+              <Route path="/admin/bookings" element={<AdminDashboard />} />
+              <Route path="/admin/calendar" element={<AdminDashboard />} />
+              <Route path="/admin/clients" element={<AdminDashboard />} />
+              <Route path="/admin/spaces" element={<AdminDashboard />} />
+              <Route path="/admin/finance/payment" element={<AdminDashboard />} />
+              <Route path="/admin/finance/report" element={<AdminDashboard />} />
               <Route path="/admin" element={user?.isAdmin ? <Admin /> : <Navigate to="/admin/login" />} />
               <Route path="/login" element={user ? <Navigate to="/" /> : <Login onLogin={handleLogin} />} />
             </Routes>
