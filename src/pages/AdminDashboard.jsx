@@ -70,7 +70,10 @@ export default function AdminDashboard() {
   const getBookingsForDate = (date) => {
     if (!date) return []
     const dateStr = date.toISOString().split('T')[0]
-    return bookings.filter(b => b.booking_date === dateStr)
+    return bookings.filter(b => {
+      const bookingDate = b.booking_date ? b.booking_date.split('T')[0] : b.booking_date
+      return bookingDate === dateStr
+    })
   }
 
   const formatMonthYear = (date) => {
