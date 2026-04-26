@@ -2,7 +2,19 @@ import { useState, useEffect, useMemo } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { LayoutDashboard, Calendar, ChevronDown, Users, Home, Wallet, TrendingUp, CheckCircle, XCircle, LogOut, CreditCard, BarChart3, CalendarDays, Loader2, ChevronLeft, ChevronRight, CalendarRange, Search, User, Mail, Phone, Wrench, AlertCircle } from 'lucide-react'
 import { supabase, getBookings, updateBookingStatus as supabaseUpdateStatus, getClients } from '../lib/supabase'
-import { rooms } from '../lib/data'
+
+const adminSpaces = [
+  { id: 1, name: 'Grand Seminar Hall', capacity: 120, price: 'RM150', image: '/Spaces/Grand Seminar Hall.png' },
+  { id: 2, name: 'Tech Innovation Lab', capacity: 40, price: 'RM120', image: '/Spaces/Tech Innovation Lab.png' },
+  { id: 3, name: 'Executive Boardroom', capacity: 20, price: 'RM100', image: '/Spaces/Executive Boardroom.png' },
+  { id: 4, name: 'Creative Workshop', capacity: 30, price: 'RM90', image: '/Spaces/Creative Workshop.png' },
+  { id: 5, name: 'Pitching Theatre', capacity: 50, price: 'RM110', image: '/Spaces/Pitching Theatre.png' },
+  { id: 6, name: 'Podcast & Media Studio', capacity: 4, price: 'RM80', image: '/Spaces/Podcast & Media Studio.png' },
+  { id: 7, name: 'Agile Sprint Room', capacity: 15, price: 'RM70', image: '/Spaces/Agile Sprint Room.png' },
+  { id: 8, name: 'Strategy War Room', capacity: 10, price: 'RM60', image: '/Spaces/Strategy War Room.png' },
+  { id: 9, name: 'Focus Pod', capacity: 6, price: 'RM40', image: '/Spaces/Focus Pod.png' },
+  { id: 10, name: 'Zen Huddle Space', capacity: 8, price: 'RM45', image: '/Spaces/Zen Huddle Space.png' },
+]
 
 const sidebarLinks = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, path: '/admin/dashboard' },
@@ -397,38 +409,44 @@ export default function AdminDashboard() {
         {activeLink === 'spaces' && (
           <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {rooms.map((space) => (
+              {adminSpaces.map((space) => (
                 <div 
                   key={space.id} 
-                  className={`bg-white rounded-xl overflow-hidden shadow-sm border transition-opacity ${spaces[space.id] ? 'opacity-50 border-red-200' : 'border-neutral-100'}`}
+                  className={`bg-white rounded-2xl border overflow-hidden transition-all ${spaces[space.id] ? 'opacity-50 border-red-200' : 'border-neutral-100 shadow-sm hover:shadow-md'}`}
                 >
-                  <div className="relative h-40">
+                  <div className="relative aspect-video">
                     <img src={space.image} alt={space.name} className="w-full h-full object-cover" />
                     {spaces[space.id] && (
                       <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                        <div className="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-medium flex items-center gap-2">
+                        <div className="bg-red-500 text-white px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2">
                           <Wrench className="w-4 h-4" />
                           Under Maintenance
                         </div>
                       </div>
                     )}
                   </div>
-                  <div className="p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <h3 className="font-semibold text-neutral-900">{space.name}</h3>
-                      <span className="text-pink-600 font-medium">RM{space.pricePerHour}/hr</span>
+                  <div className="p-5">
+                    <h3 className="text-lg font-bold text-neutral-900">{space.name}</h3>
+                    <div className="flex items-center gap-2 mt-2 text-neutral-500 text-sm">
+                      <Users className="w-4 h-4" />
+                      <span>{space.capacity} Pax</span>
                     </div>
-                    <p className="text-sm text-neutral-500 mb-3">Capacity: {space.capacity} people</p>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-neutral-500">
-                        {spaces[space.id] ? 'Marked unavailable' : 'Available'}
-                      </span>
-                      <button
-                        onClick={() => toggleMaintenance(space.id)}
-                        className={`relative w-12 h-6 rounded-full transition-colors ${spaces[space.id] ? 'bg-red-500' : 'bg-green-500'}`}
-                      >
-                        <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${spaces[space.id] ? 'translate-x-7' : 'translate-x-1'}`} />
-                      </button>
+                    <div className="flex justify-between items-center mt-4 pt-4 border-t border-neutral-100">
+                      <div>
+                        <span className="font-bold text-neutral-900">{space.price}</span>
+                        <span className="text-neutral-500 text-sm">/hr</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span className="text-sm text-neutral-500">
+                          {spaces[space.id] ? 'Unavailable' : 'Available'}
+                        </span>
+                        <button
+                          onClick={() => toggleMaintenance(space.id)}
+                          className={`relative w-12 h-6 rounded-full transition-colors ${spaces[space.id] ? 'bg-red-500' : 'bg-green-500'}`}
+                        >
+                          <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${spaces[space.id] ? 'translate-x-7' : 'translate-x-1'}`} />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
