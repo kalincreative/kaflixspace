@@ -10,6 +10,7 @@ import VenueDetails from './pages/VenueDetails'
 import Checkout from './pages/Checkout'
 import Gallery from './pages/Gallery'
 import News from './pages/News'
+import SingleNews from './pages/SingleNews'
 import Contact from './pages/Contact'
 import { ReservationProvider } from './context/ReservationContext'
 import ReservationDrawer from './components/ReservationDrawer'
@@ -51,6 +52,7 @@ export default function App() {
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/gallery" element={<Gallery />} />
             <Route path="/news" element={<News />} />
+            <Route path="/news/:id" element={<SingleNews />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/booking/:roomId" element={<Booking />} />
             <Route path="/booking" element={<Booking />} />
