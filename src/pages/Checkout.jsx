@@ -42,18 +42,20 @@ export default function Checkout() {
         space_name: bookingData.spaceName,
         booking_date: bookingData.date,
         time_slot: bookingData.timeRange,
-        location: 'KaFlix Space, Kuala Lumpur',
       }
       
-      await emailjs.send(
+      emailjs.init(EMAILJS_PUBLIC_KEY)
+      console.log('Sending to:', bookingData.clientEmail)
+      
+      const response = await emailjs.send(
         EMAILJS_SERVICE_ID,
         EMAILJS_TEMPLATE_ID,
-        templateParams,
-        EMAILJS_PUBLIC_KEY
+        templateParams
       )
-      console.log('Confirmation email sent successfully')
+      console.log('Email sent:', response.status)
     } catch (error) {
-      console.error('EmailJS error:', error?.text || error?.message || error)
+      console.error('EmailJS error:', error)
+      console.log('Booking data received:', bookingData.clientEmail)
     }
   }
 
