@@ -41,6 +41,7 @@ export default function AdminDashboard() {
   const [statusFilter, setStatusFilter] = useState('all')
   const [clientSearch, setClientSearch] = useState('')
   const [spaceSearch, setSpaceSearch] = useState('')
+  const [spaceStatusFilter, setSpaceStatusFilter] = useState('all')
   const [clientPage, setClientPage] = useState(1)
   
   const CLIENTS_PER_PAGE = 10
@@ -1186,13 +1187,14 @@ export default function AdminDashboard() {
                   />
                 </div>
                 <select
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
+                  value={spaceStatusFilter}
+                  onChange={(e) => setSpaceStatusFilter(e.target.value)}
                   className="px-4 py-2.5 border border-neutral-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-pink-500/20"
                 >
-                  <option value="all">All Status</option>
+                  <option value="all">All Active</option>
                   <option value="available">Available</option>
                   <option value="booked">Booked Today</option>
+                  <option value="unavailable">Unavailable</option>
                 </select>
               </div>
             </div>
@@ -1201,7 +1203,9 @@ export default function AdminDashboard() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {adminSpaces.filter(space => {
                 const searchMatch = space.name.toLowerCase().includes(spaceSearch.toLowerCase())
-                if (statusFilter === 'all') return searchMatch
+                const isUnavailable = spaces[space.id]
+                if (spaceStatusFilter === 'all') return searchMatch && !isUnavailable
+                if (spaceStatusFilter === 'unavailable') return searchMatch && isUnavailable
                 
                 const todayBookings = bookings.filter(b => 
                   b.space_name === space.name && 
@@ -1209,9 +1213,9 @@ export default function AdminDashboard() {
                   b.booking_date === new Date().toISOString().split('T')[0]
                 )
                 
-                if (statusFilter === 'available') return searchMatch && todayBookings.length === 0
-                if (statusFilter === 'booked') return searchMatch && todayBookings.length > 0
-                return searchMatch
+                if (spaceStatusFilter === 'available') return searchMatch && !isUnavailable && todayBookings.length === 0
+                if (spaceStatusFilter === 'booked') return searchMatch && !isUnavailable && todayBookings.length > 0
+                return searchMatch && !isUnavailable
               }).map(space => {
                 const spaceBookings = bookings.filter(b => b.space_name === space.name && b.status === 'approved')
                 const revenue = spaceBookings.reduce((sum, b) => sum + parseFloat(b.total_price || 0), 0)
@@ -1229,13 +1233,33 @@ export default function AdminDashboard() {
                         <h3 className="font-semibold text-neutral-900">{space.name}</h3>
                         <p className="text-sm text-neutral-500">{space.capacity} pax</p>
                       </div>
-                      <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${
-                        isBookedToday 
-                          ? 'bg-yellow-100 text-yellow-700' 
-                          : 'bg-green-100 text-green-700'
-                      }`}>
-                        {isBookedToday ? 'Booked' : 'Available'}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => {
+                            const newSpaces = { ...spaces, [space.id]: !spaces[space.id] }
+                            setSpaces(newSpaces)
+                            localStorage.setItem('kaflix_spaces_maintenance', JSON.stringify(newSpaces))
+                            toast(!spaces[space.id] ? `${space.name} marked unavailable` : `${space.name} marked available`)
+                          }}
+                          className={`p-1.5 rounded-lg transition-colors ${
+                            spaces[space.id] 
+                              ? 'bg-red-100 text-red-600' 
+                              : 'bg-neutral-100 text-neutral-500 hover:bg-green-100 hover:text-green-600'
+                          }`}
+                          title={spaces[space.id] ? 'Mark available' : 'Mark unavailable'}
+                        >
+                          {spaces[space.id] ? <X className="w-4 h-4" /> : <Check className="w-4 h-4" />}
+                        </button>
+                        <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${
+                          spaces[space.id] 
+                            ? 'bg-red-100 text-red-700' 
+                            : isBookedToday 
+                              ? 'bg-yellow-100 text-yellow-700' 
+                              : 'bg-green-100 text-green-700'
+                        }`}>
+                          {spaces[space.id] ? 'Unavailable' : isBookedToday ? 'Booked' : 'Available'}
+                        </span>
+                      </div>
                     </div>
                     <div className="grid grid-cols-3 gap-2 pt-3 border-t border-neutral-100">
                       <div>
