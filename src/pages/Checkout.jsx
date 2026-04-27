@@ -43,25 +43,20 @@ export default function Checkout() {
         booking_date: bookingData.date,
         time_slot: bookingData.timeRange,
         location: bookingData.location || 'KaFlix Space, Kuala Lumpur',
+        to_email: bookingData.clientEmail,
       }
       
       console.log('Sending email to:', bookingData.clientEmail, 'with params:', templateParams)
       
-      // Use sendForm or direct send with toEmail parameter
       const response = await emailjs.send(
         EMAILJS_SERVICE_ID,
         EMAILJS_TEMPLATE_ID,
-        templateParams,
-        { 
-          from_name: 'KaFlix Space',
-          to_email: bookingData.clientEmail 
-        }
+        templateParams
       )
       console.log('Email sent successfully:', response.status, response.text)
     } catch (error) {
       console.error('EmailJS error:', error)
-      console.error('Error code:', error?.status)
-      console.error('Error text:', error?.text)
+      console.error('Full error object:', JSON.stringify(error, null, 2))
     }
   }
 
