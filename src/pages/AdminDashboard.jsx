@@ -1261,22 +1261,22 @@ export default function AdminDashboard() {
                             <div className="flex items-center gap-3">
                               <div className="w-10 h-10 rounded-full bg-pink-100 flex items-center justify-center shrink-0">
                                 <span className="text-pink-600 font-semibold text-sm">
-                                  {client.name?.charAt(0)?.toUpperCase() || '?'}
+                                  {(client.name || client.client_name || '?').charAt(0).toUpperCase()}
                                 </span>
                               </div>
-                              <span className="text-sm font-medium text-neutral-900">{client.name}</span>
+                              <span className="text-sm font-medium text-neutral-900">{client.name || client.client_name}</span>
                             </div>
                           </td>
                           <td className="px-6 py-4 text-sm text-neutral-600">{client.email}</td>
                           <td className="px-6 py-4 text-sm text-neutral-600">{client.phone || '-'}</td>
-                          <td className="px-6 py-4 text-sm font-medium text-neutral-900">
-                            {client.total_spent ? `RM ${parseFloat(client.total_spent).toLocaleString()}` : 'RM 0'}
-                          </td>
-                          <td className="px-6 py-4">
-                            <span className="px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
-                              {client.booking_count || 0}
-                            </span>
-                          </td>
+<td className="px-6 py-4 text-sm font-medium text-neutral-900">
+                             {client.total_spent ? `RM ${parseFloat(client.total_spent).toLocaleString()}` : 'RM 0'}
+                           </td>
+                           <td className="px-6 py-4">
+                             <span className="px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
+                               {client.total_bookings || 0}
+                             </span>
+                           </td>
                         </tr>
                       ))}
                     </tbody>
