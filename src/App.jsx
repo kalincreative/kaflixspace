@@ -18,6 +18,7 @@ import TrackBooking from './pages/TrackBooking'
 import { ReservationProvider } from './context/ReservationContext'
 import ReservationDrawer from './components/ReservationDrawer'
 import Footer from './components/Footer'
+import ScrollToTop from './components/ScrollToTop'
 
 export default function App() {
   const [user, setUser] = useState(null)
@@ -46,6 +47,7 @@ export default function App() {
 
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <ReservationProvider>
         <div className="flex flex-col min-h-screen bg-[#F5F5F5]">
           {!window.location.pathname.startsWith('/admin') && <Navbar />}
