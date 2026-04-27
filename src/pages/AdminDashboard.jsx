@@ -58,7 +58,8 @@ export default function AdminDashboard() {
 
   const [activeLink, setActiveLink] = useState(getActiveLinkFromPath(location.pathname))
 
-  // Search, filter, pagination states
+  // Calendar filter state
+  const [calendarStatusFilter, setCalendarStatusFilter] = useState('all')
   const [searchQuery, setSearchQuery] = useState('')
   const [dateFrom, setDateFrom] = useState('')
   const [dateTo, setDateTo] = useState('')
@@ -992,55 +993,144 @@ export default function AdminDashboard() {
                   </>
                 )}
               </>
-            )}
+)}
           </div>
         )}
 
-        {activeLink === 'spaces' && (
+        {activeLink === 'calendar' && (
           <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {adminSpaces.map((space) => (
-                <div 
-                  key={space.id} 
-                  className={`bg-white rounded-2xl border overflow-hidden transition-all ${spaces[space.id] ? 'opacity-50 border-red-200' : 'border-neutral-100 shadow-sm hover:shadow-md'}`}
-                >
-                  <div className="relative aspect-video">
-                    <img src={space.image} alt={space.name} className="w-full h-full object-cover" />
-                    {spaces[space.id] && (
-                      <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                        <div className="bg-red-500 text-white px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2">
-                          <Wrench className="w-4 h-4" />
-                          Under Maintenance
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                  <div className="p-5">
-                    <h3 className="text-lg font-bold text-neutral-900">{space.name}</h3>
-                    <div className="flex items-center gap-2 mt-2 text-neutral-500 text-sm">
-                      <Users className="w-4 h-4" />
-                      <span>{space.capacity} Pax</span>
-                    </div>
-                    <div className="flex justify-between items-center mt-4 pt-4 border-t border-neutral-100">
-                      <div>
-                        <span className="font-bold text-neutral-900">{space.price}</span>
-                        <span className="text-neutral-500 text-sm">/hr</span>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <span className="text-sm text-neutral-500">
-                          {spaces[space.id] ? 'Unavailable' : 'Available'}
-                        </span>
-                        <button
-                          onClick={() => toggleMaintenance(space.id)}
-                          className={`relative w-12 h-6 rounded-full transition-colors ${spaces[space.id] ? 'bg-red-500' : 'bg-green-500'}`}
-                        >
-                          <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${spaces[space.id] ? 'translate-x-7' : 'translate-x-1'}`} />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
+            {/* Calendar Header */}
+            <div className="bg-white rounded-2xl p-6 shadow-sm border border-neutral-100">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-4">
+                  <button
+                    onClick={prevMonth}
+                    className="p-2 rounded-lg hover:bg-neutral-100 transition-colors"
+                  >
+                    <ChevronLeft className="w-5 h-5" />
+                  </button>
+                  <h3 className="text-lg font-semibold text-neutral-900">
+                    {formatMonthYear(currentMonth)}
+                  </h3>
+                  <button
+                    onClick={nextMonth}
+                    className="p-2 rounded-lg hover:bg-neutral-100 transition-colors"
+                  >
+                    <ChevronRight className="w-5 h-5" />
+                  </button>
                 </div>
-              ))}
+                <div className="flex items-center gap-2">
+                  <Filter className="w-4 h-4 text-neutral-400" />
+                  <select
+                    value={calendarStatusFilter}
+                    onChange={(e) => setCalendarStatusFilter(e.target.value)}
+                    className="px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-pink-500/20"
+                  >
+                    <option value="all">All Status</option>
+                    <option value="pending">Pending</option>
+                    <option value="approved">Approved</option>
+                    <option value="rejected">Rejected</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Calendar Grid */}
+              <div className="grid grid-cols-7 gap-2">
+                {/* Day Headers */}
+                {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+                  <div key={day} className="text-center text-sm font-medium text-neutral-500 py-2">
+                    {day}
+                  </div>
+                ))}
+
+                {/* Calendar Days */}
+                {getDaysInMonth(currentMonth).map((date, idx) => {
+                  if (!date) return <div key={idx} className="aspect-square" />
+                  
+                  const dayBookings = getBookingsForDate(date)
+                  const filteredBookings = calendarStatusFilter === 'all' 
+                    ? dayBookings 
+                    : dayBookings.filter(b => b.status === calendarStatusFilter)
+                  
+                  const isToday = date.toDateString() === new Date().toDateString()
+                  
+                  return (
+                    <div 
+                      key={idx}
+                      className={`aspect-square p-2 rounded-lg border transition-colors ${
+                        isToday 
+                          ? 'border-pink-500 bg-pink-50' 
+                          : 'border-neutral-100 hover:border-neutral-200'
+                      }`}
+                    >
+                      <div className="text-sm font-medium text-neutral-700 mb-1">
+                        {date.getDate()}
+                      </div>
+                      <div className="flex flex-wrap gap-1">
+                        {filteredBookings.slice(0, 3).map((booking, i) => (
+                          <div 
+                            key={i}
+                            className={`w-2 h-2 rounded-full ${
+                              booking.status === 'approved' ? 'bg-green-500' :
+                              booking.status === 'rejected' ? 'bg-red-500' : 'bg-yellow-500'
+                            }`}
+                            title={`${booking.client_name} - ${booking.space_name}`}
+                          />
+                        ))}
+                        {filteredBookings.length > 3 && (
+                          <span className="text-xs text-neutral-400">+{filteredBookings.length - 3}</span>
+                        )}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+
+              {/* Legend */}
+              <div className="flex items-center gap-6 mt-6 pt-4 border-t border-neutral-100">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-green-500" />
+                  <span className="text-sm text-neutral-600">Approved</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-yellow-500" />
+                  <span className="text-sm text-neutral-600">Pending</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-red-500" />
+                  <span className="text-sm text-neutral-600">Rejected</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Bookings List for Selected/Same-Day */}
+            <div className="bg-white rounded-2xl p-6 shadow-sm border border-neutral-100">
+              <h3 className="text-lg font-semibold text-neutral-900 mb-4">Bookings This Month</h3>
+              {bookings.length === 0 ? (
+                <p className="text-neutral-500 text-center py-8">No bookings this month</p>
+              ) : (
+                <div className="space-y-3">
+                  {bookings.slice(0, 10).map(booking => (
+                    <div key={booking.id} className="flex items-center gap-4 p-3 rounded-lg bg-neutral-50">
+                      <div className={`w-2 h-2 rounded-full ${
+                        booking.status === 'approved' ? 'bg-green-500' :
+                        booking.status === 'rejected' ? 'bg-red-500' : 'bg-yellow-500'
+                      }`} />
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-neutral-900">{booking.client_name}</p>
+                        <p className="text-xs text-neutral-500">{booking.space_name}</p>
+                      </div>
+                      <div className="text-sm text-neutral-600">{formatDate(booking.booking_date)}</div>
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        booking.status === 'approved' ? 'bg-green-100 text-green-700' :
+                        booking.status === 'rejected' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'
+                      }`}>
+                        {booking.status}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         )}
