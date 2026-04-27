@@ -1211,7 +1211,7 @@ export default function AdminDashboard() {
         )}
 
         {activeLink === 'clients' && (
-          <div className="bg-white rounded-xl shadow-sm border border-neutral-100 overflow-hidden">
+          <div className="bg-white rounded-xl shadow-sm border border-neutral-100">
             {clientsLoading ? (
               <div className="flex items-center justify-center p-12">
                 <Loader2 className="w-8 h-8 text-pink-500 animate-spin" />
