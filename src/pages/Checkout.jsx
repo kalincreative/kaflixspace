@@ -38,28 +38,30 @@ export default function Checkout() {
   const sendConfirmationEmail = async (bookingData) => {
     try {
       const templateParams = {
-        to_email: bookingData.clientEmail,
-        to_name: bookingData.clientName,
+        client_name: bookingData.clientName,
         space_name: bookingData.spaceName,
         booking_date: bookingData.date,
         time_slot: bookingData.timeRange,
-        location: bookingData.location || 'KaFlix Space HQ',
-        client_name: bookingData.clientName,
+        location: bookingData.location || 'KaFlix Space, Kuala Lumpur',
       }
       
-      console.log('Sending email with params:', templateParams)
+      console.log('Sending email to:', bookingData.clientEmail, 'with params:', templateParams)
       
+      // Use sendForm or direct send with toEmail parameter
       const response = await emailjs.send(
         EMAILJS_SERVICE_ID,
         EMAILJS_TEMPLATE_ID,
         templateParams,
-        EMAILJS_PUBLIC_KEY
+        { 
+          from_name: 'KaFlix Space',
+          to_email: bookingData.clientEmail 
+        }
       )
       console.log('Email sent successfully:', response.status, response.text)
     } catch (error) {
       console.error('EmailJS error:', error)
+      console.error('Error code:', error?.status)
       console.error('Error text:', error?.text)
-      console.error('Error status:', error?.status)
     }
   }
 
