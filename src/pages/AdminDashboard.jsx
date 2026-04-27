@@ -1262,14 +1262,14 @@ export default function AdminDashboard() {
                           </td>
                           <td className="px-6 py-4 text-sm text-neutral-600">{client.email}</td>
                           <td className="px-6 py-4 text-sm text-neutral-600">{client.phone || '-'}</td>
-<td className="px-6 py-4 text-sm font-medium text-neutral-900">
-                             {client.total_spent ? `RM ${parseFloat(client.total_spent).toLocaleString()}` : 'RM 0'}
-                           </td>
-                           <td className="px-6 py-4">
-                             <span className="px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
-                               {client.total_bookings || 0}
-                             </span>
-                           </td>
+                          <td className="px-6 py-4 text-sm font-medium text-neutral-900">
+                            {client.total_spent ? `RM ${parseFloat(client.total_spent).toLocaleString()}` : 'RM 0'}
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className="px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
+                              {client.total_bookings || 0}
+                            </span>
+                          </td>
                         </tr>
                       ))}
                     </tbody>
