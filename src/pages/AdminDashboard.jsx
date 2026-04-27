@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { LayoutDashboard, Calendar, ChevronDown, Users, Home, Wallet, TrendingUp, CheckCircle, XCircle, LogOut, CreditCard, BarChart3, CalendarDays, Loader2, ChevronLeft, ChevronRight, CalendarRange, Search, User, Mail, Phone, Wrench, AlertCircle, Filter, CheckSquare, Square, Trash2, ArrowUpRight, ArrowDownRight, Clock, TrendingUp as TrendingUpIcon, CalendarCheck, DollarSign, Clock3, Menu, X, ChevronRight as ChevronRightIcon } from 'lucide-react'
+import { LayoutDashboard, Calendar, ChevronDown, Users, Home, Wallet, TrendingUp, CheckCircle, XCircle, LogOut, CreditCard, BarChart3, CalendarDays, Loader2, ChevronLeft, ChevronRight, CalendarRange, Search, User, Mail, Phone, Wrench, AlertCircle, Filter, CheckSquare, Square, Trash2, ArrowUpRight, ArrowDownRight, Clock, TrendingUp as TrendingUpIcon, CalendarCheck, DollarSign, Clock3, Menu, X, ChevronRight as ChevronRightIcon, XCircle as XIcon } from 'lucide-react'
 import { supabase, getBookings, updateBookingStatus as supabaseUpdateStatus, getClients } from '../lib/supabase'
 import { ToastContainer, useToast } from '../components/Toast'
 
@@ -60,6 +60,7 @@ export default function AdminDashboard() {
 
   // Calendar filter state
   const [calendarStatusFilter, setCalendarStatusFilter] = useState('all')
+  const [selectedDate, setSelectedDate] = useState(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [dateFrom, setDateFrom] = useState('')
   const [dateTo, setDateTo] = useState('')
@@ -1053,20 +1054,27 @@ export default function AdminDashboard() {
                     : dayBookings.filter(b => b.status === calendarStatusFilter)
                   
                   const isToday = date.toDateString() === new Date().toDateString()
+                  const hasBookings = filteredBookings.length > 0
                   
                   return (
-                    <div 
+                    <button 
                       key={idx}
-                      className={`aspect-square p-2 rounded-lg border transition-colors ${
+                      onClick={() => hasBookings && setSelectedDate(date)}
+                      disabled={!hasBookings}
+                      className={`aspect-square p-2 rounded-lg border transition-all ${
                         isToday 
                           ? 'border-pink-500 bg-pink-50' 
-                          : 'border-neutral-100 hover:border-neutral-200'
-                      }`}
+                          : hasBookings
+                            ? 'border-neutral-200 hover:border-pink-300 hover:shadow-md cursor-pointer'
+                            : 'border-neutral-100 bg-neutral-50'
+                      } ${hasBookings ? 'cursor-pointer' : 'cursor-default'}`}
                     >
-                      <div className="text-sm font-medium text-neutral-700 mb-1">
+                      <div className={`text-sm font-medium mb-1 ${
+                        isToday ? 'text-pink-600' : 'text-neutral-700'
+                      }`}>
                         {date.getDate()}
                       </div>
-                      <div className="flex flex-wrap gap-1">
+                      <div className="flex flex-wrap gap-1 justify-center">
                         {filteredBookings.slice(0, 3).map((booking, i) => (
                           <div 
                             key={i}
@@ -1074,14 +1082,13 @@ export default function AdminDashboard() {
                               booking.status === 'approved' ? 'bg-green-500' :
                               booking.status === 'rejected' ? 'bg-red-500' : 'bg-yellow-500'
                             }`}
-                            title={`${booking.client_name} - ${booking.space_name}`}
                           />
                         ))}
                         {filteredBookings.length > 3 && (
                           <span className="text-xs text-neutral-400">+{filteredBookings.length - 3}</span>
                         )}
                       </div>
-                    </div>
+                    </button>
                   )
                 })}
               </div>
@@ -1103,35 +1110,54 @@ export default function AdminDashboard() {
               </div>
             </div>
 
-            {/* Bookings List for Selected/Same-Day */}
-            <div className="bg-white rounded-2xl p-6 shadow-sm border border-neutral-100">
-              <h3 className="text-lg font-semibold text-neutral-900 mb-4">Bookings This Month</h3>
-              {bookings.length === 0 ? (
-                <p className="text-neutral-500 text-center py-8">No bookings this month</p>
-              ) : (
-                <div className="space-y-3">
-                  {bookings.slice(0, 10).map(booking => (
-                    <div key={booking.id} className="flex items-center gap-4 p-3 rounded-lg bg-neutral-50">
-                      <div className={`w-2 h-2 rounded-full ${
-                        booking.status === 'approved' ? 'bg-green-500' :
-                        booking.status === 'rejected' ? 'bg-red-500' : 'bg-yellow-500'
-                      }`} />
-                      <div className="flex-1">
-                        <p className="text-sm font-medium text-neutral-900">{booking.client_name}</p>
-                        <p className="text-xs text-neutral-500">{booking.space_name}</p>
-                      </div>
-                      <div className="text-sm text-neutral-600">{formatDate(booking.booking_date)}</div>
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        booking.status === 'approved' ? 'bg-green-100 text-green-700' :
-                        booking.status === 'rejected' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'
-                      }`}>
-                        {booking.status}
-                      </span>
-                    </div>
-                  ))}
+            {/* Booking Details Popup */}
+            {selectedDate && (
+              <div className="bg-white rounded-2xl p-6 shadow-sm border border-neutral-100">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h3 className="text-lg font-semibold text-neutral-900">
+                      Bookings on {selectedDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                    </h3>
+                    <p className="text-sm text-neutral-500">
+                      {getBookingsForDate(selectedDate).filter(b => calendarStatusFilter === 'all' || b.status === calendarStatusFilter).length} booking(s)
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setSelectedDate(null)}
+                    className="p-2 hover:bg-neutral-100 rounded-lg transition-colors"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
                 </div>
-              )}
-            </div>
+
+                <div className="space-y-3">
+                  {getBookingsForDate(selectedDate)
+                    .filter(b => calendarStatusFilter === 'all' || b.status === calendarStatusFilter)
+                    .map(booking => (
+                      <div key={booking.id} className="flex items-center gap-4 p-4 rounded-xl bg-neutral-50">
+                        <div className={`w-2 h-2 rounded-full ${
+                          booking.status === 'approved' ? 'bg-green-500' :
+                          booking.status === 'rejected' ? 'bg-red-500' : 'bg-yellow-500'
+                        }`} />
+                        <div className="flex-1">
+                          <p className="font-medium text-neutral-900">{booking.client_name}</p>
+                          <p className="text-sm text-neutral-500">{booking.space_name}</p>
+                          <p className="text-sm text-neutral-400">{booking.time_range}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-medium text-neutral-900">RM {booking.total_price}</p>
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            booking.status === 'approved' ? 'bg-green-100 text-green-700' :
+                            booking.status === 'rejected' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'
+                          }`}>
+                            {booking.status}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
 
