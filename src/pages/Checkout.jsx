@@ -44,7 +44,12 @@ export default function Checkout() {
         time_slot: bookingData.timeRange,
       }
       
-      const response = await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, params)
+      const response = await emailjs.send(
+        EMAILJS_SERVICE_ID, 
+        EMAILJS_TEMPLATE_ID, 
+        params,
+        EMAILJS_PUBLIC_KEY
+      )
       console.log('Email sent:', response.status)
     } catch (error) {
       console.error('EmailJS error:', error)
