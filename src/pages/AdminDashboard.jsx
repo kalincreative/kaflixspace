@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { LayoutDashboard, Calendar, ChevronDown, Users, Home, Wallet, TrendingUp, CheckCircle, XCircle, LogOut, CreditCard, BarChart3, CalendarDays, Loader2, ChevronLeft, ChevronRight, CalendarRange, Search, User, Mail, Phone, Wrench, AlertCircle, Filter, CheckSquare, Square, Trash2, ArrowUpRight, ArrowDownRight, Clock, TrendingUp as TrendingUpIcon, CalendarCheck, DollarSign, Clock3 } from 'lucide-react'
+import { LayoutDashboard, Calendar, ChevronDown, Users, Home, Wallet, TrendingUp, CheckCircle, XCircle, LogOut, CreditCard, BarChart3, CalendarDays, Loader2, ChevronLeft, ChevronRight, CalendarRange, Search, User, Mail, Phone, Wrench, AlertCircle, Filter, CheckSquare, Square, Trash2, ArrowUpRight, ArrowDownRight, Clock, TrendingUp as TrendingUpIcon, CalendarCheck, DollarSign, Clock3, Menu, X, ChevronRight as ChevronRightIcon } from 'lucide-react'
 import { supabase, getBookings, updateBookingStatus as supabaseUpdateStatus, getClients } from '../lib/supabase'
 import { ToastContainer, useToast } from '../components/Toast'
 
@@ -67,6 +67,9 @@ export default function AdminDashboard() {
 
   // Toast notifications
   const { toasts, removeToast, toast } = useToast()
+
+  // Mobile sidebar state
+  const [sidebarOpen, setSidebarOpen] = useState(false)
 
   useEffect(() => {
     fetchBookings()
@@ -340,8 +343,36 @@ export default function AdminDashboard() {
 
   return (
     <div className="flex min-h-screen bg-neutral-100">
-      <aside className="w-64 bg-white border-r border-neutral-200 flex flex-col">
-        <div className="p-6 border-b border-neutral-100">
+      {/* Mobile Menu Button */}
+      <button
+        onClick={() => setSidebarOpen(true)}
+        className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-white rounded-lg shadow-md border border-neutral-200"
+      >
+        <Menu className="w-6 h-6 text-neutral-600" />
+      </button>
+
+      {/* Mobile Overlay */}
+      {sidebarOpen && (
+        <div 
+          className="lg:hidden fixed inset-0 bg-black/50 z-40"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      {/* Sidebar */}
+      <aside className={`fixed lg:relative z-50 lg:z-auto w-64 h-screen bg-white border-r border-neutral-200 flex flex-col transform transition-transform duration-300 lg:transform-none ${
+        sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+      }`}>
+        {/* Mobile Header */}
+        <div className="lg:hidden flex items-center justify-between p-4 border-b border-neutral-100">
+          <h1 className="text-xl font-bold"><span className="text-[#FF1493]">KaFlix</span> Admin</h1>
+          <button onClick={() => setSidebarOpen(false)} className="p-2 hover:bg-neutral-100 rounded-lg">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Desktop Header */}
+        <div className="hidden lg:block p-6 border-b border-neutral-100">
           <h1 className="text-xl font-bold"><span className="text-[#FF1493]">KaFlix</span> Admin</h1>
         </div>
         
@@ -398,12 +429,27 @@ export default function AdminDashboard() {
         </div>
       </aside>
 
-      <main className="flex-1 p-8">
+      <main className="flex-1 p-4 md:p-8 lg:p-8">
         <ToastContainer toasts={toasts} removeToast={removeToast} />
         
+        {/* Breadcrumbs */}
+        <div className="mb-4 lg:mb-6 flex items-center gap-2 text-sm text-neutral-500">
+          <a href="/admin/dashboard" className="hover:text-pink-600 transition-colors">Admin</a>
+          <ChevronRightIcon className="w-4 h-4" />
+          <span className="text-neutral-900 font-medium">
+            {activeLink === 'dashboard' ? 'Dashboard' :
+             activeLink === 'all-bookings' ? 'Bookings' :
+             activeLink === 'calendar' ? 'Calendar' :
+             activeLink === 'clients' ? 'Clients' :
+             activeLink === 'spaces' ? 'Spaces' :
+             activeLink === 'payment' ? 'Payments' :
+             activeLink === 'report' ? 'Reports' : 'Dashboard'}
+          </span>
+        </div>
+
         {/* Page Header */}
-        <div className="mb-8">
-          <h2 className="text-2xl font-bold text-neutral-900">
+        <div className="mb-6 lg:mb-8">
+          <h2 className="text-xl md:text-2xl font-bold text-neutral-900">
             {activeLink === 'all-bookings' ? 'Booking Management' : 
              activeLink === 'calendar' ? 'Calendar View' :
              activeLink === 'clients' ? 'Clients' :
@@ -984,6 +1030,81 @@ export default function AdminDashboard() {
                   </tbody>
                 </table>
               </div>
+            )}
+          </div>
+        )}
+
+        {activeLink === 'clients' && (
+          <div className="bg-white rounded-xl shadow-sm border border-neutral-100 overflow-hidden">
+            {clientsLoading ? (
+              <div className="flex items-center justify-center p-12">
+                <Loader2 className="w-8 h-8 text-pink-500 animate-spin" />
+              </div>
+            ) : clients.length === 0 ? (
+              <div className="flex flex-col items-center justify-center p-12 text-center">
+                <Users className="w-16 h-16 text-neutral-300 mb-4" />
+                <p className="text-lg font-medium text-neutral-600">No clients found</p>
+                <p className="text-neutral-500 mt-1">Clients will appear here once they make bookings.</p>
+              </div>
+            ) : (
+              <>
+                {/* Client Search */}
+                <div className="p-4 border-b border-neutral-100">
+                  <div className="relative max-w-md">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400" />
+                    <input
+                      type="text"
+                      placeholder="Search clients..."
+                      value={clientSearch}
+                      onChange={(e) => setClientSearch(e.target.value)}
+                      className="w-full pl-10 pr-4 py-2.5 border border-neutral-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-pink-500/20 focus:border-pink-500"
+                    />
+                  </div>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-neutral-50">
+                      <tr>
+                        <th className="px-6 py-4 text-left text-sm font-semibold text-neutral-600">Client</th>
+                        <th className="px-6 py-4 text-left text-sm font-semibold text-neutral-600">Email</th>
+                        <th className="px-6 py-4 text-left text-sm font-semibold text-neutral-600">Phone</th>
+                        <th className="px-6 py-4 text-left text-sm font-semibold text-neutral-600">Total Spent</th>
+                        <th className="px-6 py-4 text-left text-sm font-semibold text-neutral-600">Bookings</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-neutral-100">
+                      {clients
+                        .filter(c => !clientSearch || 
+                          c.name?.toLowerCase().includes(clientSearch.toLowerCase()) ||
+                          c.email?.toLowerCase().includes(clientSearch.toLowerCase()))
+                        .map((client) => (
+                        <tr key={client.id} className="hover:bg-neutral-50 transition-colors">
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-full bg-pink-100 flex items-center justify-center">
+                                <span className="text-pink-600 font-semibold">
+                                  {client.name?.charAt(0)?.toUpperCase() || '?'}
+                                </span>
+                              </div>
+                              <span className="text-sm font-medium text-neutral-900">{client.name}</span>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 text-sm text-neutral-600">{client.email}</td>
+                          <td className="px-6 py-4 text-sm text-neutral-600">{client.phone || '-'}</td>
+                          <td className="px-6 py-4 text-sm font-medium text-neutral-900">
+                            RM {parseFloat(client.total_spent || 0).toLocaleString()}
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className="px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
+                              {client.booking_count || 0}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </>
             )}
           </div>
         )}
