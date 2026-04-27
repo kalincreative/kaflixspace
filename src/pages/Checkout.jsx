@@ -45,16 +45,21 @@ export default function Checkout() {
         to_email: bookingData.clientEmail,
       }
       
-      const response = await emailjs.send(
-        EMAILJS_SERVICE_ID,
-        EMAILJS_TEMPLATE_ID,
-        templateParams,
-        EMAILJS_PUBLIC_KEY
-      )
+      // Try using sendForm with a form element
+      const form = document.createElement('form')
+      form.innerHTML = `
+        <input name="client_name" value="${bookingData.clientName}" />
+        <input name="space_name" value="${bookingData.spaceName}" />
+        <input name="booking_date" value="${bookingData.date}" />
+        <input name="time_slot" value="${bookingData.timeRange}" />
+        <input name="to_email" value="${bookingData.clientEmail}" />
+      `
+      
+      emailjs.init(EMAILJS_PUBLIC_KEY)
+      const response = await emailjs.sendForm(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, form)
       console.log('Email sent:', response.status)
     } catch (error) {
       console.error('EmailJS error:', error)
-      console.log('EmailJS 4th param approach - trying alternative...')
     }
   }
 
